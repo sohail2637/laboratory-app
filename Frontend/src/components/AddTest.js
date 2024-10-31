@@ -7,7 +7,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function AddTest({ addTestModel, handlePageUpdate  ,units}) {
     const [open, setOpen] = useState(true);
-    const [error, setError] = useState("");
+    const [error, setError] = useState({
+        test_name: "",
+        min_value: "",
+        max_value: "",
+        unit: "",
+    });
     const cancelButtonRef = useRef(null);
     const authContext = useContext(AuthContext);
 
@@ -27,18 +32,25 @@ export default function AddTest({ addTestModel, handlePageUpdate  ,units}) {
         }
     };
 
-  
+    const validateFields = () => {
+        const newErrors = {};
+        const requiredFields = ['test_name', 'min_value', 'max_value', 'unit'];
+        
+        requiredFields.forEach(field => {
+            if (!tests[field].trim()) {
+                newErrors[field] = `${field.replace('_', ' ')} is required`;
+            }
+        });
+        setError(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     // // Function to add tests
     const addTest = async () => {
-        if (!tests.test_name.trim()) {
-            setError("Test Name  is required");
+        if (!validateFields()) {
             return;
         }
-        // if (!tests.unit_abb.trim()) {
-        //     setError("Test Abbreviation  is required");
-        //     return;
-        // }
+       
 
         try {
             const response = await fetch("http://localhost:4000/api/test/add-test", {
@@ -125,9 +137,9 @@ export default function AddTest({ addTestModel, handlePageUpdate  ,units}) {
                                                                     placeholder="Name"
                                                                 />
                                                                 {/* Error message */}
-                                                                {error && (
+                                                                {error.test_name && (
                                                                     <p className="mt-1 text-sm text-red-600">
-                                                                        {error}
+                                                                        {error.test_name}
                                                                     </p>
                                                                 )}
                                                             </div>
@@ -148,12 +160,12 @@ export default function AddTest({ addTestModel, handlePageUpdate  ,units}) {
                                                                         handleInputChange(e.target.name, e.target.value)
                                                                     }
                                                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                                                    placeholder="Abbreviation"
+                                                                    placeholder="MinValue"
                                                                 />
                                                                 {/* Error message */}
-                                                                {error && (
+                                                                {error.min_value && (
                                                                     <p className="mt-1 text-sm text-red-600">
-                                                                        {error}
+                                                                        {error.min_value}
                                                                     </p>
                                                                 )}
                                                             </div>
@@ -178,12 +190,12 @@ export default function AddTest({ addTestModel, handlePageUpdate  ,units}) {
                                                                         handleInputChange(e.target.name, e.target.value)
                                                                     }
                                                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                                                    placeholder="Abbreviation"
+                                                                    placeholder="MaxValue"
                                                                 />
                                                                 {/* Error message */}
-                                                                {error && (
+                                                                {error.max_value && (
                                                                     <p className="mt-1 text-sm text-red-600">
-                                                                        {error}
+                                                                        {error.max_value}
                                                                     </p>
                                                                 )}
                                                             </div>
@@ -210,9 +222,9 @@ export default function AddTest({ addTestModel, handlePageUpdate  ,units}) {
                                                                     ))}
                                                                 </select>
                                                                 {/* Error message */}
-                                                                {error && (
+                                                                {error.unit && (
                                                                     <p className="mt-1 text-sm text-red-600">
-                                                                        {error}
+                                                                        {error.unit}
                                                                     </p>
                                                                 )}
                                                             </div>

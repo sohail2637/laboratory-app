@@ -8,6 +8,7 @@ const catalogeRoute = require("./router/cataloge");
 const catalogeDesignRoute = require("./router/catalogeDesign");
 const unitRoute = require('./router/unit')
 const testRoute = require('./router/test')
+const patientRoute = require('./router/patient')
 
 
 const cors = require("cors");
@@ -42,6 +43,8 @@ app.use("/api/cataloge_design", catalogeDesignRoute);
 app.use("/api/unit",unitRoute );
 
 app.use("/api/test",testRoute );
+
+app.use("/api/patient", patientRoute );
 
 // ------------- Signin --------------
 let userAuthCheck;

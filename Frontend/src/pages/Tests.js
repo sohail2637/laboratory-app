@@ -77,7 +77,6 @@ function Tests() {
   useEffect(() => {
     fetchTestData();
     fetchUnitData()
-    // toast.success("hello")
   }, [updatePage]);
 
   return (

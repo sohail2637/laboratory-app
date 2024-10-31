@@ -17,6 +17,9 @@ import Catalogue from "./pages/Catalogue";
 import CatalogueDetail from "./pages/CatalogueDetail";
 import Tests from "./pages/Tests";
 import Units from "./pages/Units";
+import Patient from "./pages/Patient";
+import PatientForm from "./pages/PatientForm";
+import PatientPreview from "./pages/PatientPreview";
 // import { ToastContainer } from "react-toastify";
 
 const App = () => {
@@ -77,8 +80,12 @@ const App = () => {
               </ProtectedWrapper>
             }
           >
-            <Route index element={<Tests />} />
+            <Route index element={<Patient />} />
+            <Route path="/patient-form" element={<PatientForm />} />
+            <Route path="/patient-form/:id" element={<PatientForm />} />
+            <Route path="/patient-preview/:id" element={<PatientPreview />} />
             <Route path="/unit-details" element={<Units />} />
+            <Route path="/test-details" element={<Tests />} />
           </Route>
           <Route path="*" element={<NoPageFound />} />
         </Routes>

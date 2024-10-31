@@ -80,6 +80,13 @@ function SideMenu() {
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           >
             <GrCatalog size={20} color="grey" />
+            <span className="text-sm font-medium">Patients</span>
+          </Link>
+          <Link
+            to="/test-details"
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+          >
+            <GrCatalog size={20} color="grey" />
             <span className="text-sm font-medium">Tests</span>
           </Link>
           <Link

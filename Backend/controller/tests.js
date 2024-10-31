@@ -7,6 +7,7 @@ const addTest = (req, res) => {
         test_name: req.body.test_name,
         min_value: req.body.min_value,
         max_value: req.body.max_value,
+        result: req.body.result,
         unit: req.body.unit,
     });
 
@@ -29,7 +30,7 @@ const getAllTest = async (req, res) => {
         const findAllCataloge = await Test.find({
             userID: req.params.userId,
         })
-        .populate('unit', 'unit_abb') // Populate only the 'name' field from the 'Unit' document
+            .populate('unit') // Populate only the 'name' field from the 'Unit' document
 
         res.json(findAllCataloge);
     } catch (err) {
@@ -70,6 +71,7 @@ const updateTest = async (req, res) => {
                 test_name: req.body.test_name,
                 min_value: req.body.min_value,
                 max_value: req.body.max_value,
+                result: req.body.result,
                 unit: req.body.unit,
             },
             { new: true }
