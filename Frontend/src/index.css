@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base{img {display : initial;}}
 
 body {
   margin: 0;
@@ -38,25 +39,43 @@ code {
 }
 
 .A4-page {
-    width: 793.7px; /* Approximate A4 width */
-    height: 1122.5px; /* Approximate A4 height */
-    margin: auto;
-    padding: 20px;
-    background: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+    width: 794px;
+    height: 1123px;
+    box-shadow: none;
+    margin: 0;
+    padding: 8mm;
+    overflow: hidden;
+    page-break-inside: avoid;
+    page-break-after: auto;
+    page-break-before: always;
 
-@media print {
+}
+#capture {
+    /* width: 794px;
+    height: 1123px;
+    box-shadow: none;
+    margin: 0;
+    margin-bottom: 12px;
+    padding: 8mm;
+    width: 794px; 
+    padding: 20px; */
+    /* background-color: white; */
+  }
+  .page-break {
+    page-break-before: always;
+}
+/* @media print {
     .A4-page {
-        width: 210mm;
-        height: 297mm;
-        box-shadow: none;
+        width: 794px;
+        height: 1123px;
         margin: 0;
-        padding: 10mm;
-        page-break-after: always;
+        padding: 8mm;
+        overflow: hidden;
     }
-    .print-button {
-        display: none;
+} */
+@media print {
+    .page {
+        page-break-after: always;
     }
 }
 
