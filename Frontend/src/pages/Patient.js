@@ -8,6 +8,11 @@ import EditCatalogue from '../components/EditCatalogue';
 import DeleteCataloge from '../components/DeleteCataloge';
 import { ToastContainer } from 'react-toastify';
 import DeletePatient from '../components/DeletePatient';
+import { FiDownload } from "react-icons/fi";
+import PatientPreviewDownload from '../components/PatientPreviewDownload';
+import ReactDOMServer from 'react-dom/server';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 function Patient() {
     const authContext = useContext(AuthContext);
@@ -26,10 +31,6 @@ function Patient() {
     const deleteModel = () => {
         setDeleteModal(!showDeleteModal);
     };
-    // const editCatalogueModel = (element) => {
-    //     setEditCatalogueModal(!showEditCatalogueModal);
-    //     setSinglePatient(element)
-    // };
     const handlePageUpdate = () => {
         setUpdatePage(!updatePage);
     };
@@ -38,15 +39,15 @@ function Patient() {
         if (!nameSearchTerm.trim() && !referSearchTerm.trim() && !phoneSearchTerm) {
             return true;
         }
-    
+
         const matchedName = nameSearchTerm && element.patient_name.toLowerCase().includes(nameSearchTerm.toLowerCase());
         const matchedReferBy = referSearchTerm && element.refer_by.toLowerCase().includes(referSearchTerm.toLowerCase());
         const matchedPhone = phoneSearchTerm && element.phone_number.toString().includes(phoneSearchTerm);
-    
+
         return matchedName || matchedReferBy || matchedPhone;
     });
-    
-    
+
+
 
 
     const fetchCatalogeData = () => {
@@ -67,7 +68,69 @@ function Patient() {
     };
 
 
+    const downloadJSX = async (patientId) => {
+        const patientResponse = await fetch(`http://localhost:4000/api/patient/edit_patient/${patientId}`);
+        const patientData = await patientResponse.json();
 
+        const unitResponse = await fetch(`http://localhost:4000/api/unit/listing_unit/${authContext.user}`);
+        const unitData = await unitResponse.json();
+        const htmlString = ReactDOMServer.renderToString(
+            <PatientPreviewDownload
+                patients={patientData}
+                units={unitData}
+            />
+        );
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlString;
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.top = '-999px';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.margin = '0';
+        tempDiv.style.padding = '0';
+        tempDiv.style.height = 'auto';
+        tempDiv.style.overflow = 'hidden';
+        tempDiv.style.zIndex = '-1';
+        document.body.appendChild(tempDiv);
+
+        setTimeout(async () => {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        
+            const chunks = [];
+            let MAX_TESTS_PER_PAGE = 15; 
+            for (let i = 0; i < patientData.test_type.length; i += MAX_TESTS_PER_PAGE) {
+                chunks.push(patientData.test_type.slice(i, i + MAX_TESTS_PER_PAGE));
+            }
+            for (let i = 0; i < chunks.length; i++) {
+                tempDiv.innerHTML = ReactDOMServer.renderToString(
+                    <div>
+                        {/* Render only the rows for the current page */}
+                        <PatientPreviewDownload
+                            patients={{
+                                ...patientData,
+                                test_type: chunks[i],
+                            }}
+                            units={unitData}
+                        />
+                    </div>
+                );
+        
+                const canvas = await html2canvas(tempDiv, { scale: 2 });
+                const imgData = canvas.toDataURL('image/png');
+                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+                if (i > 0) pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
+            }
+        
+            document.body.removeChild(tempDiv);
+            pdf.save('patient-report.pdf');
+        }, 100);
+        
+    };
 
 
     useEffect(() => {
@@ -169,6 +232,9 @@ function Patient() {
                                         Preview
                                     </th>
                                     <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                        Download
+                                    </th>
+                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                                         Edit
                                     </th>
                                     <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
@@ -195,7 +261,7 @@ function Patient() {
                                                         {element.patient_name}
                                                     </td>
                                                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                                                        {"0" + element.phone_number }
+                                                        {"0" + element.phone_number}
                                                     </td>
                                                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                                                         {element.refer_by}
@@ -210,6 +276,15 @@ function Patient() {
                                                                 />
                                                             </span>
                                                         </Link>
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+
+                                                        <span>
+                                                            <FiDownload color="gray" size={22} cursor={'pointer'}
+                                                                onClick={() => downloadJSX(element._id)}
+                                                            />
+                                                        </span>
+
                                                     </td>
                                                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
 
@@ -243,9 +318,11 @@ function Patient() {
 
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>
+
         </>
     )
 }

@@ -48,7 +48,6 @@ code {
     page-break-inside: avoid;
     page-break-after: auto;
     page-break-before: always;
-
 }
 #capture {
     /* width: 794px;
