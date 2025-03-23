@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { IoArrowBackSharp } from "react-icons/io5";
+import GlobalApiState from '../utilis/globalVariable';
 
 export default function PatientPreview() {
     const authContext = useContext(AuthContext);
@@ -20,6 +21,7 @@ export default function PatientPreview() {
         patient_age: "",
         lab_no: "",
         specimen: "",
+        patient_bill: "",
         date: today,
         test_type: [],
         result: "",
@@ -60,16 +62,56 @@ export default function PatientPreview() {
             setLoading(true);
 
             try {
+                const testResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/listing_test/${authContext.user}`);
+                const testData = await testResponse.json();
+
+                const options = testData.map((item) => ({
+                    test_name: item.test_name,
+                    min_value: item.min_value,
+                    max_value: item.max_value,
+                    price: item.price,
+                    unit: item.unit,
+                    id: item._id,
+                    subtests: item.subtests || [],
+                }));
+
+
                 if (params.id) {
-                    const patientResponse = await fetch(`http://localhost:4000/api/patient/edit_patient/${params.id}`);
+                    const patientResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${params.id}`);
                     const patientData = await patientResponse.json();
                     const formattedDate = new Date(patientData.date).toISOString().split("T")[0];
+
+
+                    const selectedTests = patientData.test_type.map(test => {
+                        const matchedOption = options.find(option => option.id === test.test);
+
+                        if (matchedOption) {
+                            return {
+                                ...matchedOption,
+                                result: test.result || "",
+                                subtests: matchedOption.subtests
+                                    .map(subtest => {
+                                        if (test.subtests && Array.isArray(test.subtests)) {
+                                            const matchedSubtest = test.subtests.find(st => st.subtest === subtest._id);
+                                            return matchedSubtest
+                                                ? { ...subtest, result: matchedSubtest.result || "" }
+                                                : null;
+                                        }
+                                        return null;
+                                    })
+                                    .filter(Boolean),
+                            };
+                        }
+                        return null;
+                    }).filter(Boolean);
+
                     setPatients({
                         ...patientData,
                         date: formattedDate,
+                        test_type: selectedTests
                     });
 
-                    const unitResponse = await fetch(`http://localhost:4000/api/unit/listing_unit/${authContext.user}`);
+                    const unitResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`);
                     const unitData = await unitResponse.json();
                     setAllUnits(unitData);
                 }
@@ -83,32 +125,32 @@ export default function PatientPreview() {
         fetchData();
     }, [params.id]);
 
-
     const pages = [];
     for (let i = 0; i < patients.test_type.length; i += MAX_TESTS_PER_PAGE) {
         pages.push(patients.test_type.slice(i, i + MAX_TESTS_PER_PAGE));
     }
 
+
     return (
         <>
             <div>
-                <button onClick={() => { navigate("/") }}><IoArrowBackSharp color='grey' size={'28px'} /></button>
+                <button onClick={() => { navigate("/") }}><IoArrowBackSharp color='grey' size={'28px'}  /></button>
             </div>
             {loading ? (
                 <div className='spinner-container '>
                     <div className='spinner'></div>
                 </div>
             ) : (
-                <div className="flex items-center justify-center flex-col w-[62vw] min-h-[100vh]">
+                <div className="flex items-center justify-center flex-col w-[76vw] min-h-[100vh]">
                     <div ref={componentRef} id="capture">
                         {pages.map((pageTests, pageIndex) => (
                             <div key={pageIndex} className="A4-page page">
                                 <div>
-                                    <h1 className="text-2xl font-bold text-center text-red-600">Farhad Clinic</h1>
+                                    {/* <h1 className="text-2xl font-bold text-center text-red-600">Farhad Clinic</h1>
                                     <p className="text-center text-sm text-gray-600">674-A Peoples Colony No. 1, Near Faisal Hospital, Faisalabad, Pakistan</p>
-                                    <p className="text-center text-sm text-gray-600">Ph: 041-5383830, 0300-7903294</p>
+                                    <p className="text-center text-sm text-gray-600">Ph: 041-5383830, 0300-7903294</p> */}
 
-                                    <div className="mt-8">
+                                    <div className="mt-24">
                                         <div className="flex justify-between text-sm">
                                             <div>
                                                 <p><strong>Patient Name:</strong> {patients.patient_name}</p>
@@ -134,34 +176,53 @@ export default function PatientPreview() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {pageTests.map((test, index) => (
-                                                    <tr key={index} className="text-gray-700">
-                                                        <td className="px-4">{test.test.test_name}</td>
-                                                        <td className="px-4">{test.result}</td>
-                                                        <td className="px-4">
-                                                            {test.test.min_value} - {test.test.max_value}
-                                                        </td>
-                                                        <td className="px-4">
-                                                            {(() => {
-                                                                const matchedUnit = units.find((unit) => unit._id === test.test.unit);
+                                                {pageTests.map((test, index) => {
+                                                    if (test.subtests?.length > 0) {
+                                                        return test.subtests.map((subtest) => (
+                                                            <tr key={subtest._id}>
+                                                                <td className='px-4'>{subtest.test_name}</td>
+                                                                <td className='px-4'>{subtest.result || "Pending"}</td>
+                                                                <td className="px-4">{subtest.min_value} - {subtest.max_value}</td>
+                                                                <td className="px-4">
+                                                             {(() => {
+                                                                const matchedUnit = units.find((unit) => unit._id === test.unit._id);
                                                                 return matchedUnit ? matchedUnit.unit_abb : "N/A";
                                                             })()}
                                                         </td>
-                                                    </tr>
-                                                ))}
+                                                            </tr>
+                                                        ));
+                                                    } else {
+                                                        return (
+                                                            <tr key={test.id}>
+                                                                <td className='px-4'>{test.test_name}</td>
+                                                                <td className='px-4'>{test.result || "Pending"}</td>
+                                                                <td className='px-4'>{test.min_value} - {test.max_value}</td>
+                                                                <td className="px-4">
+                                                                {(() => {
+                                                                const matchedUnit = units.find((unit) => unit._id === test.unit._id);
+                                                                return matchedUnit ? matchedUnit.unit_abb : "N/A";
+                                                            })()}
+                                                            </td>
+                                                            </tr>
+                                                        )
+                                                    }
+                                                }
+
+                                                )}
+
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
 
-                                <div className="text-center text-red-600 text-sm mt-auto">
+                                {/* <div className="text-center text-red-600 text-sm mt-auto">
                                     <p className='text-[14px] font-normal'>This report is only for management purpose. Not valid for any court Law.</p>
                                     <hr className="my-2 border-red-600 w-[94%] " />
                                     <div className='flex items-center justify-between px-4 pr-14'>
                                         <p className='text-[16px] font-medium'>Mr.Mian Umar Farooq</p>
                                         <p className='text-[16px] font-medium'>Lab Incharge</p>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         ))}
                     </div>

@@ -1,18 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react'
-import AddCatalogue from '../components/AddCatalogue';
 import { Link } from 'react-router-dom';
 import { FaEye, FaRegEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 import AuthContext from '../AuthContext';
-import EditCatalogue from '../components/EditCatalogue';
-import DeleteCataloge from '../components/DeleteCataloge';
 import { ToastContainer } from 'react-toastify';
-import DeletePatient from '../components/DeletePatient';
+import DeletePatient from '../components/Patients/DeletePatient';
 import { FiDownload } from "react-icons/fi";
-import PatientPreviewDownload from '../components/PatientPreviewDownload';
+import PatientPreviewDownload from '../components/Patients/PatientPreviewDownload';
+import PatientTestBill from '../components/Patients/PatientTestBill';
 import ReactDOMServer from 'react-dom/server';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import GlobalApiState from '../utilis/globalVariable';
 
 function Patient() {
     const authContext = useContext(AuthContext);
@@ -24,7 +23,9 @@ function Patient() {
     const [updatePage, setUpdatePage] = useState(true);
     const [nameSearchTerm, setNameSearchTerm] = useState("");
     const [referSearchTerm, setReferSearchTerm] = useState("");
+    const [labNumber, setLabNumber] = useState("");
     const [phoneSearchTerm, setPhoneSearchTerm] = useState(null);
+
     const addCatalogueModel = () => {
         setCatalogueModal(!showCatalogueModal);
     };
@@ -36,22 +37,23 @@ function Patient() {
     };
     const filterPatient = patient.filter((element) => {
 
-        if (!nameSearchTerm.trim() && !referSearchTerm.trim() && !phoneSearchTerm) {
+        if (!nameSearchTerm.trim() && !referSearchTerm.trim() && !phoneSearchTerm && !labNumber.trim()) {
             return true;
         }
 
         const matchedName = nameSearchTerm && element.patient_name.toLowerCase().includes(nameSearchTerm.toLowerCase());
         const matchedReferBy = referSearchTerm && element.refer_by.toLowerCase().includes(referSearchTerm.toLowerCase());
+        const matchLabNumber = labNumber && element.lab_no.toLowerCase().includes(labNumber.toLowerCase());
         const matchedPhone = phoneSearchTerm && element.phone_number.toString().includes(phoneSearchTerm);
 
-        return matchedName || matchedReferBy || matchedPhone;
+        return matchedName || matchedReferBy || matchedPhone || matchLabNumber;
     });
 
 
 
 
     const fetchCatalogeData = () => {
-        fetch(`http://localhost:4000/api/patient/listing_patient/${authContext.user}`)
+        fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/listing_patient/${authContext.user}`)
             .then((response) => response.json())
             .then((data) => {
                 setAllPatient(data);
@@ -59,7 +61,7 @@ function Patient() {
             .catch((err) => console.log(err));
     };
     const fetchSinglePatientData = (id) => {
-        fetch(`http://localhost:4000/api/patient/edit_patient/${id}`)
+        fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${id}`)
             .then((response) => response.json())
             .then((data) => {
                 setSinglePatient(data);
@@ -68,68 +70,154 @@ function Patient() {
     };
 
 
+    // const downloadJSX = async (patientId) => {
+    //     const patientResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${patientId}`);
+    //     const patientData = await patientResponse.json();
+
+    //     const unitResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`);
+    //     const unitData = await unitResponse.json();
+    //     const htmlString = ReactDOMServer.renderToString(
+    //         <PatientPreviewDownload
+    //             patients={patientData}
+    //             units={unitData}
+    //         />
+    //     );
+
+    //     const tempDiv = document.createElement('div');
+    //     tempDiv.innerHTML = htmlString;
+    //     tempDiv.style.position = 'absolute';
+    //     tempDiv.style.top = '-999px';
+    //     tempDiv.style.left = '-9999px';
+    //     tempDiv.style.margin = '0';
+    //     tempDiv.style.padding = '0';
+    //     tempDiv.style.height = 'auto';
+    //     tempDiv.style.overflow = 'hidden';
+    //     tempDiv.style.zIndex = '-1';
+    //     document.body.appendChild(tempDiv);
+
+    //     setTimeout(async () => {
+    //         const pdf = new jsPDF('p', 'mm', 'a4');
+    //         const pdfWidth = pdf.internal.pageSize.getWidth();
+    //         const pdfHeight = pdf.internal.pageSize.getHeight();
+
+
+    //         const chunks = [];
+    //         let MAX_TESTS_PER_PAGE = 15; 
+    //         for (let i = 0; i < patientData.test_type.length; i += MAX_TESTS_PER_PAGE) {
+    //             chunks.push(patientData.test_type.slice(i, i + MAX_TESTS_PER_PAGE));
+    //         }
+    //         for (let i = 0; i < chunks.length; i++) {
+    //             tempDiv.innerHTML = ReactDOMServer.renderToString(
+    //                 <div>
+    //                     {/* Render only the rows for the current page */}
+    //                     <PatientPreviewDownload
+    //                         patients={{
+    //                             ...patientData,
+    //                             test_type: chunks[i],
+    //                         }}
+    //                         units={unitData}
+    //                     />
+    //                 </div>
+    //             );
+
+    //             const canvas = await html2canvas(tempDiv, { scale: 2 });
+    //             const imgData = canvas.toDataURL('image/png');
+    //             const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    //             if (i > 0) pdf.addPage();
+    //             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
+    //         }
+
+    //         document.body.removeChild(tempDiv);
+    //         pdf.save('patient-report.pdf');
+    //     }, 100);
+
+    // };
+
+
     const downloadJSX = async (patientId) => {
-        const patientResponse = await fetch(`http://localhost:4000/api/patient/edit_patient/${patientId}`);
+        const testResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/listing_test/${authContext.user}`);
+        const testData = await testResponse.json();
+
+        const options = testData.map((item) => ({
+            test_name: item.test_name,
+            min_value: item.min_value,
+            max_value: item.max_value,
+            price: item.price,
+            unit: item.unit,
+            id: item._id,
+            subtests: item.subtests || [],
+        }));
+
+        const patientResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${patientId}`);
         const patientData = await patientResponse.json();
+        const selectedTests = patientData.test_type.map(test => {
+            const matchedOption = options.find(option => option.id === test.test);
+            if (matchedOption) {
+                return {
+                    ...matchedOption,
+                    result: test.result || "",
+                    selectedSubtests: matchedOption.subtests
+                    .map(subtest => {
+                        const matchedSubtest = test.subtests.find(st => st.subtest === subtest._id);
+                        return matchedSubtest
+                            ? {
+                                ...subtest, // Spread the full subtest object instead of just returning ID
+                                result: matchedSubtest.result || ""
+                            }
+                            : null;
+                    })
+                    .filter(Boolean),
+                
 
-        const unitResponse = await fetch(`http://localhost:4000/api/unit/listing_unit/${authContext.user}`);
+                };
+                
+            }
+            return null;
+        }).filter(Boolean);
+        const unitResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`);
         const unitData = await unitResponse.json();
-        const htmlString = ReactDOMServer.renderToString(
-            <PatientPreviewDownload
-                patients={patientData}
-                units={unitData}
-            />
-        );
 
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlString;
-        tempDiv.style.position = 'absolute';
-        tempDiv.style.top = '-999px';
-        tempDiv.style.left = '-9999px';
-        tempDiv.style.margin = '0';
-        tempDiv.style.padding = '0';
-        tempDiv.style.height = 'auto';
-        tempDiv.style.overflow = 'hidden';
-        tempDiv.style.zIndex = '-1';
-        document.body.appendChild(tempDiv);
+        const generatePDF = async (Component, fileName, props) => {
+            const htmlString = ReactDOMServer.renderToString(<Component {...props} />);
 
-        setTimeout(async () => {
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-        
-        
-            const chunks = [];
-            let MAX_TESTS_PER_PAGE = 15; 
-            for (let i = 0; i < patientData.test_type.length; i += MAX_TESTS_PER_PAGE) {
-                chunks.push(patientData.test_type.slice(i, i + MAX_TESTS_PER_PAGE));
-            }
-            for (let i = 0; i < chunks.length; i++) {
-                tempDiv.innerHTML = ReactDOMServer.renderToString(
-                    <div>
-                        {/* Render only the rows for the current page */}
-                        <PatientPreviewDownload
-                            patients={{
-                                ...patientData,
-                                test_type: chunks[i],
-                            }}
-                            units={unitData}
-                        />
-                    </div>
-                );
-        
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = htmlString;
+            tempDiv.style.position = "absolute";
+            tempDiv.style.top = "-999px";
+            tempDiv.style.left = "-9999px";
+            document.body.appendChild(tempDiv);
+
+            setTimeout(async () => {
+                const pdf = new jsPDF("p", "mm", "a4");
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+
                 const canvas = await html2canvas(tempDiv, { scale: 2 });
-                const imgData = canvas.toDataURL('image/png');
+                const imgData = canvas.toDataURL("image/png");
                 const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-                if (i > 0) pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
-            }
-        
-            document.body.removeChild(tempDiv);
-            pdf.save('patient-report.pdf');
-        }, 100);
-        
+
+                pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
+
+                document.body.removeChild(tempDiv);
+
+                pdf.save(fileName);
+            }, 100);
+        };
+
+        const fullPatientData = {
+            ...patientData,
+           test_type: selectedTests, 
+        };
+        await generatePDF(PatientPreviewDownload, "patient-report.pdf", {
+            patients: fullPatientData,
+            units: unitData,
+        });
+
+        await generatePDF(PatientTestBill, "patient-bill.pdf", {
+            patients: fullPatientData,
+            units: unitData,
+        });
     };
 
 
@@ -140,7 +228,7 @@ function Patient() {
     return (
         <>
 
-            <div className="col-span-12 lg:col-span-10  flex justify-center">
+            <div className="col-span-12 lg:col-span-10 mt-3 flex justify-center">
 
                 <div className=" flex flex-col gap-5 w-11/12">
 
@@ -159,55 +247,34 @@ function Patient() {
                         <div className="flex gap-4 justify-start items-start p-5 ">
                             <span className="font-bold">Patient Details</span>
                         </div>
-                        <div className="flex justify-between pt-5 pb-3 px-3">
-                            <div className="flex justify-center items-center px-2 border-2 rounded-md ">
-                                <img
-                                    alt="search-icon"
-                                    className="w-5 h-5"
-                                    src={require("../assets/search-icon.png")}
-                                />
-                                <input
-                                    className="input-field border-none outline-none text-xs"
-                                    type="text"
-                                    placeholder="Search by name"
-                                    value={nameSearchTerm}
-                                    onChange={(e) => setNameSearchTerm(e.target.value)}
-                                />
+                        <div className="flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 p-3">
+                            <div className="flex flex-col md:flex-row gap-2 md:gap-4 w-full">
+                                {[
+                                    { placeholder: "Search by name", value: nameSearchTerm, onChange: setNameSearchTerm },
+                                    { placeholder: "Search by number", value: phoneSearchTerm, onChange: setPhoneSearchTerm },
+                                    { placeholder: "Search by refer", value: referSearchTerm, onChange: setReferSearchTerm },
+                                    { placeholder: "Search by lab number", value: labNumber, onChange: setLabNumber }
+                                ].map((field, index) => (
+                                    <div key={index} className="flex items-center px-2 border-2 rounded-md w-full md:w-auto h-[40px] ">
+                                        <img
+                                            alt="search-icon"
+                                            className="w-5 h-5"
+                                            src={require("../assets/search-icon.png")}
+                                        />
+                                        <input
+                                            className="input-field border-none outline-none text-xs w-full p-1"
+                                            type="text"
+                                            placeholder={field.placeholder}
+                                            value={field.value}
+                                            onChange={(e) => field.onChange(e.target.value)}
+                                        />
+                                    </div>
+                                ))}
+                                
                             </div>
-                            <div className="flex justify-center items-center px-2 border-2 rounded-md ">
-                                <img
-                                    alt="search-icon"
-                                    className="w-5 h-5"
-                                    src={require("../assets/search-icon.png")}
-                                />
-                                <input
-                                    className="input-field border-none outline-none text-xs"
-                                    type="text"
-                                    placeholder="Search  by  number"
-                                    value={phoneSearchTerm}
-                                    onChange={(e) => setPhoneSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            <div className="flex justify-center items-center px-2 border-2 rounded-md ">
-                                <img
-                                    alt="search-icon"
-                                    className="w-5 h-5"
-                                    src={require("../assets/search-icon.png")}
-                                />
-                                <input
-                                    className="input-field border-none outline-none text-xs"
-                                    type="text"
-                                    placeholder="Search by refer "
-                                    value={referSearchTerm}
-                                    onChange={(e) => setReferSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            <div className="flex gap-4">
+                            <div className="flex justify-center md:justify-start">
                                 <Link to={"/patient-form"}>
-                                    <button
-                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 text-xs  rounded"
-
-                                    >
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 text-xs rounded h-[40px] lg:w-[120px] w-full">
                                         Add Patient
                                     </button>
                                 </Link>
@@ -224,6 +291,12 @@ function Patient() {
                                     </th>
                                     <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                                         Refer by
+                                    </th>
+                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                        Lab Number
+                                    </th>
+                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                        Total Bill
                                     </th>
                                     <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                                         Specimen
@@ -265,6 +338,12 @@ function Patient() {
                                                     </td>
                                                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                                                         {element.refer_by}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        {element.lab_no}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        {element.patient_bill ? element.patient_bill : "-"}
                                                     </td>
                                                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                                                         {element.specimen}

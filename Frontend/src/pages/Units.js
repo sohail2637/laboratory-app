@@ -1,14 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
-import AddCatalogue from '../components/AddCatalogue';
-import { Link } from 'react-router-dom';
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 import AuthContext from '../AuthContext';
-import EditCatalogue from '../components/EditCatalogue';
-import DeleteCataloge from '../components/DeleteCataloge';
 import { toast, ToastContainer } from 'react-toastify';
-import AddUnits from '../components/AddUnits';
-import EditUnit from '../components/EditUnit';
+import AddUnits from '../components/Units/AddUnits';
+import EditUnit from '../components/Units/EditUnit';
+import GlobalApiState from '../utilis/globalVariable';
 
 function Units() {
   const authContext = useContext(AuthContext);
@@ -38,7 +35,7 @@ function Units() {
 
 
   const fetchCatalogeData = () => {
-    fetch(`http://localhost:4000/api/unit/listing_unit/${authContext.user}`)
+    fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => {
         setAllUnits(data);
@@ -46,7 +43,7 @@ function Units() {
       .catch((err) => console.log(err));
   };
   // const fetchSingleCatalogeData = (id) => {
-  //   fetch(`http://localhost:4000/api/cataloge/edit_unit/${id}`)
+  //   fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/cataloge/edit_unit/${id}`)
   //     .then((response) => response.json())
   //     .then((data) => {
   //       setSingleUnit(data);
@@ -58,7 +55,7 @@ function Units() {
   const deleteItem = async (id) => {
 
     try {
-      const response = await fetch(`http://localhost:4000/api/unit/delete_unit/${id}`, {
+      const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/delete_unit/${id}`, {
         method: 'DELETE'
       });
       const data = await response.json();
@@ -79,7 +76,7 @@ function Units() {
   return (
     <>
 
-      <div className="col-span-12 lg:col-span-10  flex justify-center">
+      <div className="col-span-12 lg:col-span-10 mt-3 flex justify-center">
 
         <div className=" flex flex-col gap-5 w-11/12">
 
@@ -102,8 +99,8 @@ function Units() {
             <div className="flex gap-4 justify-start items-start p-5 ">
               <span className="font-bold">Units Detail</span>
             </div>
-            <div className="flex justify-between pt-5 pb-3 px-3">
-              <div className="flex justify-center items-center px-2 border-2 rounded-md ">
+            <div className="flex justify-between md:flex-row flex-col gap-2 pt-5 pb-3 px-3">
+              <div className="flex justify-center items-center px-2 border-2 h-[40px] rounded-md ">
                 <img
                   alt="search-icon"
                   className="w-5 h-5"
@@ -119,7 +116,7 @@ function Units() {
               </div>
               <div className="flex gap-4">
                 <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 text-xs  rounded"
+                  className="bg-blue-500 hover:bg-blue-700 text-white h-[40px] lg:w-[120px] w-full font-bold p-2 text-xs  rounded"
                   onClick={addUnitModel}
                 >
                   Add Units

@@ -1,14 +1,15 @@
 import { Dialog, Transition } from '@headlessui/react'
 import React, { Fragment, useRef, useState } from 'react'
+import GlobalApiState from '../../utilis/globalVariable';
 
-export default function DeleteCataloge({deleteCatalogueModel , setUpdatePage , updatePage , singlecatalogue}) {
+export default function DeletePatient({deleteModel , setUpdatePage , updatePage , singlePatient}) {
     const [open, setOpen] = useState(true);
     const cancelButtonRef = useRef(null);
 
     const deleteItem = async (id) => {
 
         try {
-            const response = await fetch(`http://localhost:4000/api/cataloge/delete_cataloge/${singlecatalogue._id}`, {
+           const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/delete_patient/${singlePatient._id}`, {
                 method: 'DELETE'
             });
             const data = await response.json();
@@ -55,7 +56,7 @@ export default function DeleteCataloge({deleteCatalogueModel , setUpdatePage , u
                                 <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                                     <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                         <p className="text-xl text-center text-gray-500">
-                                            Are you sure you want to delete this catalog?</p>
+                                            Are you sure you want to delete this Patient?</p>
                                     </div>
 
                                     <div className="m-4 flex justify-end gap-4">
@@ -63,13 +64,13 @@ export default function DeleteCataloge({deleteCatalogueModel , setUpdatePage , u
                                             type="button"
                                             className="inline-flex justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
                                             ref={cancelButtonRef} 
-                                            onClick={()=>deleteCatalogueModel()}                                       >
+                                            onClick={()=>deleteModel()}                                       >
                                             Cancel
                                         </button>
                                         <button
                                             type="button"
                                             className="inline-flex justify-center rounded-md border border-transparent bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-                                            onClick={()=>{deleteCatalogueModel()
+                                            onClick={()=>{deleteModel()
                                                 deleteItem()}}
                                             ref={cancelButtonRef} 
 

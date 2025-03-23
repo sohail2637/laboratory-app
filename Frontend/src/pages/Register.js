@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import UploadImage from "../components/UploadImage";
 import { toast, ToastContainer } from "react-toastify";
+import GlobalApiState from "../utilis/globalVariable";
 
 function Register() {
   const [form, setForm] = useState({
@@ -14,6 +15,7 @@ function Register() {
   });
 
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   // Handling Input change for registration form.
   const handleInputChange = (e) => {
@@ -21,23 +23,56 @@ function Register() {
   };
 
   // Register User
-  const registerUser = () => {
-    fetch("http://localhost:4000/api/register", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(form),
-    })
-      .then((result) => {
+  // const registerUser = () => {
+  //   fetch("${GlobalApiState.DEV_BASE_LIVE}/api/register", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-type": "application/json",
+  //     },
+  //     body: JSON.stringify(form),
+  //   })
+  //     .then((result) => {
+  //       toast.success("Successfully Registered, Now Login with your details");
+  //       setTimeout(() => {
+  //         navigate('/login');
+  //       }, 1000);
+  //     })        
+
+  //     .catch((err) => console.log(err));
+  // };
+  const registerUser = async () => {
+    setLoading(true);  // Set loading to true when button is clicked
+    try {
+      const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      // if (!response.ok) {
+      //   throw new Error("Registration failed. Please try again.");
+      // }
+      const data = await response.json();
+
+      if (data.message === "Signup successful") {
         toast.success("Successfully Registered, Now Login with your details");
+
         setTimeout(() => {
-          navigate('/login');
+          navigate("/login");
         }, 1000);
-      })        
-    
-      .catch((err) => console.log(err));
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong. Please try again.");
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
   // ------------------
 
   // Uploading image to cloudinary
@@ -65,7 +100,7 @@ function Register() {
 
   return (
     <>
-    <ToastContainer/>
+      <ToastContainer />
       <div className="grid grid-cols-1 sm:grid-cols-2 h-screen  items-center place-items-center">
         <div className="w-full max-w-md space-y-8  p-10 rounded-lg">
           <div>
@@ -174,20 +209,17 @@ function Register() {
                 type="submit"
                 className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 onClick={registerUser}
+                disabled={loading} // Disable the button while loading
               >
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  {/* <LockClosedIcon
-                      className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-                      aria-hidden="true"
-                    /> */}
-                </span>
-                Sign up
+                {loading ? (
+                  <span className="animate-spin h-5 w-5 mr-2 border-t-2 border-white rounded-full border-solid border-transparent border-r-indigo-600"></span>
+                ) : (
+                  "Sign up"
+                )}
               </button>
               <p className="mt-2 text-center text-sm text-gray-600">
                 Or{" "}
-                <span
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
+                <span className="font-medium text-indigo-600 hover:text-indigo-500">
                   Already Have an Account, Please
                   <Link to="/login"> Signin now </Link>
                 </span>

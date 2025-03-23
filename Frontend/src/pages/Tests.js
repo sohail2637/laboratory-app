@@ -1,16 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react'
-import AddCatalogue from '../components/AddCatalogue';
 import { Link } from 'react-router-dom';
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 import AuthContext from '../AuthContext';
-import EditCatalogue from '../components/EditCatalogue';
-import DeleteCataloge from '../components/DeleteCataloge';
 import { toast, ToastContainer } from 'react-toastify';
-import AddUnits from '../components/AddUnits';
-import EditUnit from '../components/EditUnit';
-import AddTest from '../components/AddTest';
-import EditTest from '../components/EditTest';
+import AddTest from '../components/Tests/AddTest';
+import EditTest from '../components/Tests/EditTest';
+import GlobalApiState from '../utilis/globalVariable';
 
 function Tests() {
   const authContext = useContext(AuthContext);
@@ -35,22 +31,22 @@ function Tests() {
   const handlePageUpdate = () => {
     setUpdatePage(!updatePage);
   };
-  const filteredCatalogue = tests.filter((element) =>
-    element.test_name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCatalogue = tests?.filter((element) =>
+    element?.test_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
 
   const fetchTestData = () => {
-    fetch(`http://localhost:4000/api/test/listing_test/${authContext.user}`)
+    fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/listing_test/${authContext.user}`)
       .then((response) => response.json())
       .then((data) => {
-        setAllTest(data);
+        setAllTest(Array.isArray(data) ? data : []);
       })
       .catch((err) => console.log(err));
   };
 
   const fetchUnitData = () => {
-    fetch(`http://localhost:4000/api/unit/listing_unit/${authContext.user}`)
+    fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`)
         .then((response) => response.json())
         .then((data) => {
             setAllUnits(data);
@@ -61,7 +57,7 @@ function Tests() {
   const deleteItem = async (id) => {
 
     try {
-      const response = await fetch(`http://localhost:4000/api/test/delete_test/${id}`, {
+      const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/delete_test/${id}`, {
         method: 'DELETE'
       });
       const data = await response.json();
@@ -82,7 +78,7 @@ function Tests() {
   return (
     <>
 
-      <div className="col-span-12 lg:col-span-10  flex justify-center">
+      <div className="col-span-12 lg:col-span-10 mt-3 flex justify-center">
 
         <div className=" flex flex-col gap-5 w-11/12">
 
@@ -97,7 +93,7 @@ function Tests() {
             <EditTest
               editTestModel={editTestModel}
               handlePageUpdate={handlePageUpdate}
-              singleTest={singleTest}
+              testData={singleTest}
               units={units}
             />
           )}
@@ -107,8 +103,8 @@ function Tests() {
             <div className="flex gap-4 justify-start items-start p-5 ">
               <span className="font-bold">Tests Detail</span>
             </div>
-            <div className="flex justify-between pt-5 pb-3 px-3">
-              <div className="flex justify-center items-center px-2 border-2 rounded-md ">
+            <div className="flex justify-between md:flex-row flex-col gap-2 pt-5 pb-3 px-3">
+              <div className="flex justify-center items-center px-2 h-[40px] border-2 rounded-md ">
                 <img
                   alt="search-icon"
                   className="w-5 h-5"
@@ -124,7 +120,7 @@ function Tests() {
               </div>
               <div className="flex gap-4">
                 <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 text-xs  rounded"
+                  className="bg-blue-500 hover:bg-blue-700 h-[40px] lg:w-[120px] w-full text-white font-bold p-2 text-xs  rounded"
                   onClick={addTestModel}
                 >
                   Add Test
@@ -145,6 +141,9 @@ function Tests() {
                   </th>
                   <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                    Unit
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                   Price
                   </th>
                   <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                     Edit
@@ -172,15 +171,18 @@ function Tests() {
                           </td>
 
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                            {element.min_value}
+                            {element.min_value ? element.min_value : "-"}
                           </td>
                           
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                            {element.max_value}
+                            {element.max_value ? element.max_value : "-"}
                           </td>
                           
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                            {element.unit.unit_abb ?element.unit.unit_abb :""}
+                            {element?.unit?.unit_abb ? element?.unit?.unit_abb :""}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                            {element?.price || 0}
                           </td>
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                             <span onClick={() => {

@@ -1,8 +1,9 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
-import AuthContext from '../AuthContext';
+import AuthContext from '../../AuthContext';
 import { toast } from 'react-toastify';
+import GlobalApiState from '../../utilis/globalVariable';
 
 export default function EditUnit({ editUnitModel, handlePageUpdate, singleUnit }) {
 
@@ -21,7 +22,7 @@ export default function EditUnit({ editUnitModel, handlePageUpdate, singleUnit }
     };
 
     const editCataloge = (id) => {
-        fetch(`http://localhost:4000/api/unit/update_unit/${id}`, {
+        fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/update_unit/${id}`, {
             method: "PUT",
             headers: {
                 "Content-type": "application/json",
@@ -29,7 +30,7 @@ export default function EditUnit({ editUnitModel, handlePageUpdate, singleUnit }
             body: JSON.stringify(unit),
         })
             .then((result) => {
-          toast.success("Cataloge Updated Successfully");
+          toast.success("Unit Updated Successfully");
 
                 handlePageUpdate();
                 editUnitModel();

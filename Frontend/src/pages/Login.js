@@ -3,12 +3,15 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthContext from "../AuthContext";
 import { toast, ToastContainer } from 'react-toastify';
+import GlobalApiState from "../utilis/globalVariable";
 
 function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
@@ -21,7 +24,7 @@ function Login() {
   const authCheck = async () => {
     setTimeout(async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/login");
+        const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/login`);
         const data = await response.json();
         localStorage.setItem("user", JSON.stringify(data));
         toast.success("Successfully Login");
@@ -39,25 +42,38 @@ function Login() {
   };
 
 
-  const loginUser = (e) => {
-    // Cannot send empty data
+  const loginUser = async (e) => {
+    e.preventDefault();
+    setIsLoading(true); // Start loading
+
     if (form.email === "" || form.password === "") {
-      toast("To login user, enter details to proceed...");
-    } else {
-      fetch("http://localhost:4000/api/login", {
+      toast.warning("Please enter both email and password to proceed.");
+      setIsLoading(false); // Ensure loading stops
+      return;
+    }
+
+    try {
+      const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/login`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",
         },
         body: JSON.stringify(form),
-      })
-        .then((result) => {
-          console.log("User login", result);
-        })
-        .catch((error) => {
-          console.log("Something went wrong ", error);
-        });
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+      toast.success("Successfully Logged in!");
+
+    } catch (err) {
+      toast.error(err.message || "Something went wrong during login.");
+      console.error(err);
+      setIsLoading(false);
     }
+
     authCheck();
   };
 
@@ -84,14 +100,14 @@ function Login() {
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
               Signin to your account
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
+            {/* <p className="mt-2 text-center text-sm text-gray-600">
               Or
               <span
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 start your 14-day free trial
               </span>
-            </p>
+            </p> */}
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {/* <input type="hidden" name="remember" defaultValue="true" /> */}
@@ -131,7 +147,7 @@ function Login() {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
@@ -144,32 +160,57 @@ function Login() {
                 >
                   Remember me
                 </label>
-              </div>
+              </div> */}
 
-              <div className="text-sm">
+              {/* <div className="text-sm">
                 <span
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                 >
                   Forgot your password?
                 </span>
-              </div>
+              </div> */}
             </div>
 
             <div>
               <button
                 type="submit"
-                className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className={`group relative flex w-full justify-center rounded-md py-2 px-3 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${isLoading
+                  ? 'bg-indigo-400 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600'
+                  }`}
                 onClick={loginUser}
+                disabled={isLoading}
               >
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  {/* <LockClosedIcon
-                    className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-                    aria-hidden="true"
-                  /> */}
+                  {isLoading ? (
+                    <svg
+                      className="h-5 w-5 animate-spin text-indigo-200"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 000 8v4a8 8 0 01-8-8z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    // Optional: Add an icon or leave blank
+                    <span></span>
+                  )}
                 </span>
-                Sign in
+                {isLoading ? 'Loading...' : 'Sign in'}
               </button>
-              <p className="mt-2 text-center text-sm text-gray-600">
+              {/* <p className="mt-2 text-center text-sm text-gray-600">
                 Or{" "}
                 <span
                   className="font-medium text-indigo-600 hover:text-indigo-500"
@@ -177,7 +218,7 @@ function Login() {
                   Don't Have an Account, Please{" "}
                   <Link to="/register"> Register now </Link>
                 </span>
-              </p>
+              </p> */}
             </div>
           </form>
         </div>
