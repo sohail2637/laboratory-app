@@ -12,6 +12,7 @@ const addPatient = (req, res) => {
         test_type: req.body.test_type,
         phone_number: req.body.phone_number,
         date: req.body.date,
+        patient_bill: req.body.patient_bill
     });
 
     addPatient
@@ -31,8 +32,7 @@ const getAllPatient = async (req, res) => {
     try {
         const findAllCataloge = await Patient.find({
             userID: req.params.userId,
-        })
-
+        }).sort({ createdAt: -1 }); // Sort by newest first
 
         res.json(findAllCataloge);
     } catch (err) {
@@ -42,7 +42,6 @@ const getAllPatient = async (req, res) => {
         });
     }
 };
-
 
 const deleteSelectedPatient = async (req, res) => {
     const deleteTest = await Patient.deleteOne(
@@ -55,6 +54,7 @@ const editPatient = (req, res) => {
     Patient.findById(req.params.id)
         .populate({
             path: "test_type.test",
+            path: "test_type.subtests",
             model: "Test"
         })
 
@@ -77,6 +77,7 @@ const updatePatient = async (req, res) => {
                 test_type: req.body.test_type,
                 phone_number: req.body.phone_number,
                 date: req.body.date,
+                patient_bill: req.body.patient_bill
 
             },
             { new: true }

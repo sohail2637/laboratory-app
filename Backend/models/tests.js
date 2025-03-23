@@ -1,5 +1,15 @@
 const mongoose = require("mongoose");
 
+const subtestSchema = new mongoose.Schema({
+    min_value: { type: Number, required: true },
+    max_value: { type: Number, required: true },
+    price: { type: Number},
+    test_name: {
+        type: String,
+        required: true,
+    },
+})
+
 const TestSchema = new mongoose.Schema(
     {
         userID: {
@@ -13,18 +23,20 @@ const TestSchema = new mongoose.Schema(
         },
         min_value: {
             type: Number,
-            required: true,
+            // required: true,
         },
         max_value: {
             type: Number,
-            required: true,
+            // required: true,
         },
-        unit:{
+        price: { type: Number},
+        unit: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Unit",
-            required: true, 
-        }
-       
+            // required: true,
+        },
+
+        subtests: { type: [subtestSchema], default: [] }
 
     },
     { timestamps: true }

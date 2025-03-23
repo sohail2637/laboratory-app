@@ -9,6 +9,8 @@ const addTest = (req, res) => {
         max_value: req.body.max_value,
         result: req.body.result,
         unit: req.body.unit,
+        price: req.body.price,
+        subtests: req.body.subtests
     });
 
     addTest
@@ -66,13 +68,15 @@ const editTest = (req, res) => {
 const updateTest = async (req, res) => {
     try {
         const updatedResult = await Test.findByIdAndUpdate(
-            req.body.id,
+            req.params.id,
             {
                 test_name: req.body.test_name,
                 min_value: req.body.min_value,
                 max_value: req.body.max_value,
                 result: req.body.result,
                 unit: req.body.unit,
+                price: req.body.price,
+                subtests: req.body.subtests
             },
             { new: true }
         );

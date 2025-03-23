@@ -12,5 +12,5 @@ app.get("/get/:userID/totalpurchaseamount", purchase.getTotalPurchaseAmount);
 
 module.exports = app;
 
-// http://localhost:4000/api/purchase/add POST
-// http://localhost:4000/api/purchase/get GET
+// ${GlobalApiState.DEV_BASE_LIVE}/api/purchase/add POST
+// ${GlobalApiState.DEV_BASE_LIVE}/api/purchase/get GET

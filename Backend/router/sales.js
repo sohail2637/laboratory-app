@@ -16,5 +16,5 @@ module.exports = app;
 
 
 
-// http://localhost:4000/api/sales/add POST
-// http://localhost:4000/api/sales/get GET
+// ${GlobalApiState.DEV_BASE_LIVE}/api/sales/add POST
+// ${GlobalApiState.DEV_BASE_LIVE}/api/sales/get GET

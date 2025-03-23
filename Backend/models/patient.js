@@ -23,6 +23,9 @@ const PatientSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        patient_bill: {
+            type: Number,
+        },
         phone_number: {
             type: Number,
             required: true,
@@ -37,10 +40,14 @@ const PatientSchema = new mongoose.Schema(
         },
         test_type: [
             {
-              test: { type: mongoose.Schema.Types.ObjectId, ref: 'Test'},  
-              result: { type: Number }                                     
-            }
-          ]
+                test: { type: mongoose.Schema.Types.ObjectId, ref: "Test", required: true },
+                result: { type: Number },
+                subtests: [
+                    {
+                        subtest: { type: mongoose.Schema.Types.ObjectId, ref: "Test.subtests" },
+                        result: { type: Number }
+                    }]
+            }]
 
     },
     { timestamps: true }
