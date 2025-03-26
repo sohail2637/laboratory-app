@@ -23,14 +23,13 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
 
     const [error, setError] = useState({});
 
-    // Handle main test input changes
     const handleInputChange = (key, value) => {
         setTest((prevTest) => ({
             ...prevTest,
-            [key]: value,
+            [key]: key === "price" ? String(value) : value,
         }));
 
-        if (value.trim()) {
+        if (String(value).trim()) {
             setError((prevError) => ({
                 ...prevError,
                 [key]: "",
@@ -62,9 +61,12 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
     const addSubtest = () => {
         setTest((prevTest) => ({
             ...prevTest,
+            min_value: "",
+            max_value: "",
             subtests: [...prevTest.subtests, { min_value: "", max_value: "", price: "" }],
         }));
     };
+
 
     // Remove a subtest
     const removeSubtest = (index) => {
@@ -80,26 +82,35 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
 
     const validateFields = () => {
         const newErrors = {};
-        if (!test.test_name.trim()) newErrors.test_name = "Test Name is required";
-        if (!test.min_value.trim()) newErrors.min_value = "Min Value is required";
-        if (!test.max_value.trim()) newErrors.max_value = "Max Value is required";
-        if (!test.unit.trim()) newErrors.unit = "Unit is required";
-        if (!test.price.trim()) newErrors.price = "Price is required";
-
+    
+        // Validate Main Test Fields
+        if (!test.test_name?.trim()) newErrors.test_name = "Test Name is required";
+        if (!test.unit?.trim()) newErrors.unit = "Unit is required";
+        if (!String(test.price || "").trim()) newErrors.price = "Price is required";
+    
+        // If no subtests exist, main test must have min/max values
+        if (test.subtests.length === 0) {
+            if (!String(test.min_value || "").trim()) newErrors.min_value = "Min Value is required";
+            if (!String(test.max_value || "").trim()) newErrors.max_value = "Max Value is required";
+        }
+    
+        // Validate Subtests
         test.subtests.forEach((sub, index) => {
-            if (!sub.min_value.trim()) newErrors[`subtest_min_${index}`] = "Min Value is required";
-            if (!sub.max_value.trim()) newErrors[`subtest_max_${index}`] = "Max Value is required";
-            if (!sub.price.trim()) newErrors[`subtest_price_${index}`] = "Price is required";
+            if (!sub.test_name?.trim()) newErrors[`subtest_name_${index}`] = "Subtest Name is required";
+            if (!String(sub.min_value || "").trim()) newErrors[`subtest_min_${index}`] = "Min Value is required";
+            if (!String(sub.max_value || "").trim()) newErrors[`subtest_max_${index}`] = "Max Value is required";
+            if (!String(sub.price || "").trim()) newErrors[`subtest_price_${index}`] = "Price is required";
         });
-
+    
         setError(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
+    
 
 
     // Function to add test with subtests
     const addTest = async () => {
+        debugger
         if (!validateFields()) {
             return;
         }
@@ -164,7 +175,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                             <div>
                                                 <label className="block text-gray-700">Min Value</label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     className="w-full rounded border p-2"
                                                     value={test.min_value}
                                                     onChange={(e) => handleInputChange("min_value", e.target.value)}
@@ -178,7 +189,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                             <div>
                                                 <label className="block text-gray-700">Max Value</label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     className="w-full rounded border p-2"
                                                     value={test.max_value}
                                                     onChange={(e) => handleInputChange("max_value", e.target.value)}
@@ -235,6 +246,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                             <h4 className="text-lg font-semibold text-gray-900">Subtests</h4>
                                             {test?.subtests?.map((sub, index) => (
                                                 <div key={index} className="flex gap-2 items-start mt-2">
+                                                    {/* Subtest Name */}
                                                     <div className="w-1/4">
                                                         <input
                                                             type="text"
@@ -243,34 +255,40 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                             value={sub.test_name}
                                                             onChange={(e) => handleSubtestChange(index, "test_name", e.target.value)}
                                                         />
-                                                        {error.test_name && (
-                                                            <p className="mt-1 text-sm text-red-600">{error.test_name}</p>
+                                                        {error[`subtest_name_${index}`] && (
+                                                            <p className="mt-1 text-sm text-red-600">{error[`subtest_name_${index}`]}</p>
                                                         )}
                                                     </div>
+
+                                                    {/* Subtest Min Value */}
                                                     <div className="w-1/4">
                                                         <input
-                                                            type="number"
+                                                            type="text"
                                                             placeholder="Min"
                                                             className="w-full rounded border p-2"
                                                             value={sub.min_value}
                                                             onChange={(e) => handleSubtestChange(index, "min_value", e.target.value)}
                                                         />
-                                                        {error.min_value && (
-                                                            <p className="mt-1 text-sm text-red-600">{error.min_value}</p>
+                                                        {error[`subtest_min_${index}`] && (
+                                                            <p className="mt-1 text-sm text-red-600">{error[`subtest_min_${index}`]}</p>
                                                         )}
                                                     </div>
+
+                                                    {/* Subtest Max Value */}
                                                     <div className="w-1/4">
                                                         <input
-                                                            type="number"
+                                                            type="text"
                                                             placeholder="Max"
                                                             className="w-full rounded border p-2"
                                                             value={sub.max_value}
                                                             onChange={(e) => handleSubtestChange(index, "max_value", e.target.value)}
                                                         />
-                                                        {error.max_value && (
-                                                            <p className="mt-1 text-sm text-red-600">{error.max_value}</p>
+                                                        {error[`subtest_max_${index}`] && (
+                                                            <p className="mt-1 text-sm text-red-600">{error[`subtest_max_${index}`]}</p>
                                                         )}
                                                     </div>
+
+                                                    {/* Subtest Price */}
                                                     <div className="w-1/4">
                                                         <input
                                                             type="number"
@@ -279,10 +297,12 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                             value={sub.price}
                                                             onChange={(e) => handleSubtestChange(index, "price", e.target.value)}
                                                         />
-                                                        {error.price && (
-                                                            <p className="mt-1 text-sm text-red-600">{error.price}</p>
+                                                        {error[`subtest_price_${index}`] && (
+                                                            <p className="mt-1 text-sm text-red-600">{error[`subtest_price_${index}`]}</p>
                                                         )}
                                                     </div>
+
+                                                    {/* Remove Button */}
                                                     <button
                                                         type="button"
                                                         onClick={() => removeSubtest(index)}
@@ -291,10 +311,10 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                         X
                                                     </button>
                                                 </div>
-
                                             ))}
                                         </div>
                                     )}
+
                                 </form>
                             </div>
 

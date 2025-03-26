@@ -402,7 +402,7 @@ export default function PatientForm() {
                                                             {test.selectedSubtests.map(subtest => (
                                                                 <div key={subtest.subtest}>
                                                                     <label className="block text-sm font-medium text-gray-900">
-                                                                        Enter Result for {subtest.label}:
+                                                                    Enter Result for {test.subtests.find(s => s._id === subtest.subtest)?.test_name || "this subtest"}:
                                                                     </label>
                                                                     <input
                                                                         type="text"

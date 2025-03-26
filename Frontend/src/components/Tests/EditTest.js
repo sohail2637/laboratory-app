@@ -183,14 +183,14 @@ export default function EditTest({ editTestModel, handlePageUpdate, testData, un
                                                             onChange={(e) => handleSubtestChange(index, "test_name", e.target.value)}
                                                         />
                                                         <input
-                                                            type="number"
+                                                            type="text"
                                                             className="w-full rounded border p-2"
                                                             placeholder="Min"
                                                             value={subtest.min_value}
                                                             onChange={(e) => handleSubtestChange(index, "min_value", e.target.value)}
                                                         />
                                                         <input
-                                                            type="number"
+                                                            type="text"
                                                             className="w-full rounded border p-2"
                                                             placeholder="Max"
                                                             value={subtest.max_value}
@@ -224,7 +224,7 @@ export default function EditTest({ editTestModel, handlePageUpdate, testData, un
                                                 <div>
                                                     <label className="block text-gray-700">Min Value</label>
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         className="w-full rounded border p-2"
                                                         value={test.min_value}
                                                         onChange={(e) => handleInputChange("min_value", e.target.value)}
@@ -233,7 +233,7 @@ export default function EditTest({ editTestModel, handlePageUpdate, testData, un
                                                 <div>
                                                     <label className="block text-gray-700">Max Value</label>
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         className="w-full rounded border p-2"
                                                         value={test.max_value}
                                                         onChange={(e) => handleInputChange("max_value", e.target.value)}

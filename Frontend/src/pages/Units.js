@@ -6,26 +6,33 @@ import { toast, ToastContainer } from 'react-toastify';
 import AddUnits from '../components/Units/AddUnits';
 import EditUnit from '../components/Units/EditUnit';
 import GlobalApiState from '../utilis/globalVariable';
+import DeleteUnit from '../components/Units/DeleteUnit';
 
 function Units() {
   const authContext = useContext(AuthContext);
 
   const [showUnitModel, setUnitModel] = useState(false);
   const [showEditUnitModel, setEditUnitModel] = useState(false);
-  const [showDeleteUnitModel, setDeleteUnitModel] = useState(false);
   const [units, setAllUnits] = useState([]);
   const [singleUnit, setSingleUnit] = useState([]);
   const [updatePage, setUpdatePage] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleteModal, setDeleteModal] = useState(false);
 
   const addUnitModel = () => {
     setUnitModel(!showUnitModel);
   };
-  
+
   const editUnitModel = (element) => {
     setEditUnitModel(!showEditUnitModel);
     setSingleUnit(element)
   };
+
+  const deleteModel = (element) => {
+    setDeleteModal(!showDeleteModal);
+    setSingleUnit(element)
+  };
+
   const handlePageUpdate = () => {
     setUpdatePage(!updatePage);
   };
@@ -52,20 +59,20 @@ function Units() {
   // };
 
 
-  const deleteItem = async (id) => {
+  // const deleteItem = async (id) => {
 
-    try {
-      const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/delete_unit/${id}`, {
-        method: 'DELETE'
-      });
-      const data = await response.json();
+  //   try {
+  //     const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/delete_unit/${id}`, {
+  //       method: 'DELETE'
+  //     });
+  //     const data = await response.json();
 
-      setUpdatePage(!updatePage);
-      toast.success("Unit Delete Successfully")
-    } catch (error) {
-      console.error('Error deleting item:', error);
-    }
-  };
+  //     setUpdatePage(!updatePage);
+  //     toast.success("Unit Delete Successfully")
+  //   } catch (error) {
+  //     console.error('Error deleting item:', error);
+  //   }
+  // };
 
 
   useEffect(() => {
@@ -93,6 +100,16 @@ function Units() {
               singleUnit={singleUnit}
             />
           )}
+
+          {showDeleteModal && (
+            <DeleteUnit
+              deleteModel={deleteModel}
+              updatePage={updatePage}
+              setUpdatePage={setUpdatePage}
+              singleUnit={singleUnit}
+            />
+          )}
+
 
           <div className="overflow-x-auto rounded-lg border bg-white border-gray-200 ">
             <ToastContainer />
@@ -174,7 +191,7 @@ function Units() {
 
                             <RiDeleteBinLine color="gray" size={22} cursor={'pointer'}
                               onClick={() => {
-                                deleteItem(element._id)
+                                deleteModel(element)
                               }}
                             />
                           </td>

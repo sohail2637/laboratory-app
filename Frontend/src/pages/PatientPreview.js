@@ -134,7 +134,7 @@ export default function PatientPreview() {
     return (
         <>
             <div>
-                <button onClick={() => { navigate("/") }}><IoArrowBackSharp color='grey' size={'28px'}  /></button>
+                <button onClick={() => { navigate("/") }}><IoArrowBackSharp color='grey' size={'28px'} /></button>
             </div>
             {loading ? (
                 <div className='spinner-container '>
@@ -177,41 +177,34 @@ export default function PatientPreview() {
                                             </thead>
                                             <tbody>
                                                 {pageTests.map((test, index) => {
-                                                    if (test.subtests?.length > 0) {
-                                                        return test.subtests.map((subtest) => (
-                                                            <tr key={subtest._id}>
-                                                                <td className='px-4'>{subtest.test_name}</td>
-                                                                <td className='px-4'>{subtest.result || "Pending"}</td>
-                                                                <td className="px-4">{subtest.min_value} - {subtest.max_value}</td>
-                                                                <td className="px-4">
-                                                             {(() => {
-                                                                const matchedUnit = units.find((unit) => unit._id === test.unit._id);
-                                                                return matchedUnit ? matchedUnit.unit_abb : "N/A";
-                                                            })()}
-                                                        </td>
-                                                            </tr>
-                                                        ));
-                                                    } else {
-                                                        return (
-                                                            <tr key={test.id}>
-                                                                <td className='px-4'>{test.test_name}</td>
-                                                                <td className='px-4'>{test.result || "Pending"}</td>
-                                                                <td className='px-4'>{test.min_value} - {test.max_value}</td>
-                                                                <td className="px-4">
-                                                                {(() => {
-                                                                const matchedUnit = units.find((unit) => unit._id === test.unit._id);
-                                                                return matchedUnit ? matchedUnit.unit_abb : "N/A";
-                                                            })()}
-                                                            </td>
-                                                            </tr>
-                                                        )
-                                                    }
-                                                }
+                                                    const matchedUnit = units.find((unit) => unit._id === test.unit?._id);
+                                                    const unitAbb = matchedUnit ? matchedUnit.unit_abb : "N/A";
 
-                                                )}
+                                                    return (
+                                                        <React.Fragment key={test.id}>
+                                                            {/* Main Test Row */}
+                                                            <tr className="">
+                                                                <td className="px-4 font-semibold">{test.test_name}</td>
+                                                                <td className="px-4">{test.subtests?.length > 0 ? "" : test.result || "Pending"}</td>
+                                                                <td className="px-4">{test.subtests?.length > 0 ? "" : `${test.min_value} - ${test.max_value}`}</td>
+                                                                <td className="px-4">{test.subtests?.length > 0 ? "" : unitAbb}</td>
+                                                            </tr>
 
+                                                            {/* Subtests Rows (If Any) */}
+                                                            {test.subtests?.map((subtest) => (
+                                                                <tr key={subtest._id}>
+                                                                    <td className="px-4 pl-8 text-gray-700">-{subtest.test_name}</td>
+                                                                    <td className="px-4">{subtest.result || "Pending"}</td>
+                                                                    <td className="px-4">{subtest.min_value} - {subtest.max_value}</td>
+                                                                    <td className="px-4">{unitAbb}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
+
                                     </div>
                                 </div>
 

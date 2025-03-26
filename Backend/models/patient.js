@@ -41,11 +41,11 @@ const PatientSchema = new mongoose.Schema(
         test_type: [
             {
                 test: { type: mongoose.Schema.Types.ObjectId, ref: "Test", required: true },
-                result: { type: Number },
+                result: { type: String },
                 subtests: [
                     {
                         subtest: { type: mongoose.Schema.Types.ObjectId, ref: "Test.subtests" },
-                        result: { type: Number }
+                        result: { type: String }
                     }]
             }]
 

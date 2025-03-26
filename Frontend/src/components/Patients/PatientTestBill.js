@@ -21,28 +21,26 @@ const PatientTestBill = ({ patients }) => {
                     <tbody>
                         {patients.test_type.map((test, index) => (
                             <React.Fragment key={index}>
-                                {/* Main Test Row (Only show if no subtests exist) */}
-                                {(!test.selectedSubtests || test.selectedSubtests.length === 0) && (
-                                    <tr className="font-semibold text-lg">
-                                        <td className="border border-gray-300 px-4 py-2">{test.test_name}</td>
-                                        <td className="border border-gray-300 px-4 py-2">{test.price || 0}</td>
-                                    </tr>
-                                )}
+                                {/* Main Test Row */}
+                                <tr className="bg-gray-100 font-semibold text-lg">
+                                    <td className="border border-gray-300 px-4 py-2">{test.test_name}</td>
+                                    <td className="border border-gray-300 px-4 py-2">
+                                        {test.selectedSubtests?.length > 0 ? "" : test.price || 0}
+                                    </td>
+                                </tr>
 
                                 {/* Subtests Rows (if any) */}
-                                {test.selectedSubtests?.length > 0 && (
-                                    test.selectedSubtests.map((subtest) => (
-                                        <tr key={subtest._id} className="text-gray-700 font-semibold text-lg">
-                                            <td className="border border-gray-300 px-4 py-2">{subtest.test_name}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{subtest.price || 0}</td>
-                                        </tr>
-                                    ))
-                                )}
+                                {test.selectedSubtests?.map((subtest) => (
+                                    <tr key={subtest._id} className="text-gray-700">
+                                        <td className="border border-gray-300 px-4 py-2 pl-8">-{subtest.test_name}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{subtest.price || 0}</td>
+                                    </tr>
+                                ))}
                             </React.Fragment>
                         ))}
                     </tbody>
-
                 </table>
+
             </div>
 
 

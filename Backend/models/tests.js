@@ -22,11 +22,11 @@ const TestSchema = new mongoose.Schema(
             required: true,
         },
         min_value: {
-            type: Number,
+            type: String,
             // required: true,
         },
         max_value: {
-            type: Number,
+            type: String,
             // required: true,
         },
         price: { type: Number},

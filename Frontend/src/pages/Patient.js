@@ -70,76 +70,15 @@ function Patient() {
     };
 
 
-    // const downloadJSX = async (patientId) => {
-    //     const patientResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${patientId}`);
-    //     const patientData = await patientResponse.json();
+    const fetchData = async (patientId) => {
+        const [testResponse, patientResponse, unitResponse] = await Promise.all([
+            fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/listing_test/${authContext.user}`).then(res => res.json()),
+            fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${patientId}`).then(res => res.json()),
+            fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`).then(res => res.json())
+        ]);
 
-    //     const unitResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`);
-    //     const unitData = await unitResponse.json();
-    //     const htmlString = ReactDOMServer.renderToString(
-    //         <PatientPreviewDownload
-    //             patients={patientData}
-    //             units={unitData}
-    //         />
-    //     );
-
-    //     const tempDiv = document.createElement('div');
-    //     tempDiv.innerHTML = htmlString;
-    //     tempDiv.style.position = 'absolute';
-    //     tempDiv.style.top = '-999px';
-    //     tempDiv.style.left = '-9999px';
-    //     tempDiv.style.margin = '0';
-    //     tempDiv.style.padding = '0';
-    //     tempDiv.style.height = 'auto';
-    //     tempDiv.style.overflow = 'hidden';
-    //     tempDiv.style.zIndex = '-1';
-    //     document.body.appendChild(tempDiv);
-
-    //     setTimeout(async () => {
-    //         const pdf = new jsPDF('p', 'mm', 'a4');
-    //         const pdfWidth = pdf.internal.pageSize.getWidth();
-    //         const pdfHeight = pdf.internal.pageSize.getHeight();
-
-
-    //         const chunks = [];
-    //         let MAX_TESTS_PER_PAGE = 15; 
-    //         for (let i = 0; i < patientData.test_type.length; i += MAX_TESTS_PER_PAGE) {
-    //             chunks.push(patientData.test_type.slice(i, i + MAX_TESTS_PER_PAGE));
-    //         }
-    //         for (let i = 0; i < chunks.length; i++) {
-    //             tempDiv.innerHTML = ReactDOMServer.renderToString(
-    //                 <div>
-    //                     {/* Render only the rows for the current page */}
-    //                     <PatientPreviewDownload
-    //                         patients={{
-    //                             ...patientData,
-    //                             test_type: chunks[i],
-    //                         }}
-    //                         units={unitData}
-    //                     />
-    //                 </div>
-    //             );
-
-    //             const canvas = await html2canvas(tempDiv, { scale: 2 });
-    //             const imgData = canvas.toDataURL('image/png');
-    //             const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    //             if (i > 0) pdf.addPage();
-    //             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
-    //         }
-
-    //         document.body.removeChild(tempDiv);
-    //         pdf.save('patient-report.pdf');
-    //     }, 100);
-
-    // };
-
-
-    const downloadJSX = async (patientId) => {
-        const testResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/listing_test/${authContext.user}`);
-        const testData = await testResponse.json();
-
-        const options = testData.map((item) => ({
+        // Process test data
+        const testOptions = testResponse.map(item => ({
             test_name: item.test_name,
             min_value: item.min_value,
             max_value: item.max_value,
@@ -149,75 +88,63 @@ function Patient() {
             subtests: item.subtests || [],
         }));
 
-        const patientResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${patientId}`);
-        const patientData = await patientResponse.json();
-        const selectedTests = patientData.test_type.map(test => {
-            const matchedOption = options.find(option => option.id === test.test);
-            if (matchedOption) {
-                return {
-                    ...matchedOption,
-                    result: test.result || "",
-                    selectedSubtests: matchedOption.subtests
+        // Process patient data with matched tests
+        const selectedTests = patientResponse.test_type.map(test => {
+            const matchedOption = testOptions.find(option => option.id === test.test);
+            if (!matchedOption) return null;
+
+            return {
+                ...matchedOption,
+                result: test.result || "",
+                selectedSubtests: matchedOption.subtests
                     .map(subtest => {
                         const matchedSubtest = test.subtests.find(st => st.subtest === subtest._id);
-                        return matchedSubtest
-                            ? {
-                                ...subtest, // Spread the full subtest object instead of just returning ID
-                                result: matchedSubtest.result || ""
-                            }
-                            : null;
+                        return matchedSubtest ? { ...subtest, result: matchedSubtest.result || "" } : null;
                     })
                     .filter(Boolean),
-                
-
-                };
-                
-            }
-            return null;
+            };
         }).filter(Boolean);
-        const unitResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`);
-        const unitData = await unitResponse.json();
 
-        const generatePDF = async (Component, fileName, props) => {
-            const htmlString = ReactDOMServer.renderToString(<Component {...props} />);
-
-            const tempDiv = document.createElement("div");
-            tempDiv.innerHTML = htmlString;
-            tempDiv.style.position = "absolute";
-            tempDiv.style.top = "-999px";
-            tempDiv.style.left = "-9999px";
-            document.body.appendChild(tempDiv);
-
-            setTimeout(async () => {
-                const pdf = new jsPDF("p", "mm", "a4");
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-
-                const canvas = await html2canvas(tempDiv, { scale: 2 });
-                const imgData = canvas.toDataURL("image/png");
-                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-                pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
-
-                document.body.removeChild(tempDiv);
-
-                pdf.save(fileName);
-            }, 100);
+        return {
+            patientData: { ...patientResponse, test_type: selectedTests },
+            unitData: unitResponse
         };
+    };
 
-        const fullPatientData = {
-            ...patientData,
-           test_type: selectedTests, 
-        };
-        await generatePDF(PatientPreviewDownload, "patient-report.pdf", {
-            patients: fullPatientData,
-            units: unitData,
-        });
+    const generatePDF = async (Component, fileName, props) => {
+        const htmlString = ReactDOMServer.renderToString(<Component {...props} />);
 
-        await generatePDF(PatientTestBill, "patient-bill.pdf", {
-            patients: fullPatientData,
-            units: unitData,
-        });
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = htmlString;
+        tempDiv.style.position = "absolute";
+        tempDiv.style.top = "-999px";
+        tempDiv.style.left = "-9999px";
+        document.body.appendChild(tempDiv);
+
+        setTimeout(async () => {
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            const canvas = await html2canvas(tempDiv, { scale: 2 });
+            const imgData = canvas.toDataURL("image/png");
+            const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
+            document.body.removeChild(tempDiv);
+
+            pdf.save(fileName);
+        }, 100);
+    };
+
+    const downloadJSX = async (patientId, type) => {
+        const { patientData, unitData } = await fetchData(patientId);
+
+        if (type === "report") {
+            await generatePDF(PatientPreviewDownload, "patient-report.pdf", { patients: patientData, units: unitData });
+        } else if (type === "bill") {
+            await generatePDF(PatientTestBill, "patient-bill.pdf", { patients: patientData, units: unitData });
+        }
     };
 
 
@@ -270,7 +197,7 @@ function Patient() {
                                         />
                                     </div>
                                 ))}
-                                
+
                             </div>
                             <div className="flex justify-center md:justify-start">
                                 <Link to={"/patient-form"}>
@@ -305,7 +232,10 @@ function Patient() {
                                         Preview
                                     </th>
                                     <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                                        Download
+                                        Report
+                                    </th>
+                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                        Bill
                                     </th>
                                     <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                                         Edit
@@ -359,8 +289,17 @@ function Patient() {
                                                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
 
                                                         <span>
-                                                            <FiDownload color="gray" size={22} cursor={'pointer'}
-                                                                onClick={() => downloadJSX(element._id)}
+                                                            <FiDownload color="green" size={22} cursor={'pointer'}
+                                                                onClick={() => downloadJSX(element._id ,"report")}
+                                                            />
+                                                        </span>
+
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+
+                                                        <span>
+                                                            <FiDownload color="red" size={22} cursor={'pointer'}
+                                                                onClick={() => downloadJSX(element._id ,"bill")}
                                                             />
                                                         </span>
 

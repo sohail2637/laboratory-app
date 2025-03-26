@@ -7,6 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import AddTest from '../components/Tests/AddTest';
 import EditTest from '../components/Tests/EditTest';
 import GlobalApiState from '../utilis/globalVariable';
+import DeleteTest from '../components/Tests/DeleteTest';
 
 function Tests() {
   const authContext = useContext(AuthContext);
@@ -19,15 +20,22 @@ function Tests() {
   const [updatePage, setUpdatePage] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [units, setAllUnits] = useState([]);
+  const [showDeleteModal, setDeleteModal] = useState(false);
 
   const addTestModel = () => {
     setTestModel(!showTestModel);
   };
-  
+
   const editTestModel = (element) => {
     setEditTestModel(!showEditTestModel);
     setSingleTest(element)
   };
+
+  const deleteModel = (element) => {
+    setDeleteModal(!showDeleteModal);
+    setSingleTest(element)
+  };
+
   const handlePageUpdate = () => {
     setUpdatePage(!updatePage);
   };
@@ -47,27 +55,27 @@ function Tests() {
 
   const fetchUnitData = () => {
     fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/unit/listing_unit/${authContext.user}`)
-        .then((response) => response.json())
-        .then((data) => {
-            setAllUnits(data);
-        })
-        .catch((err) => console.log(err));
-};
-
-  const deleteItem = async (id) => {
-
-    try {
-      const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/delete_test/${id}`, {
-        method: 'DELETE'
-      });
-      const data = await response.json();
-
-      setUpdatePage(!updatePage);
-      toast.success("Test Delete Successfully")
-    } catch (error) {
-      console.error('Error deleting item:', error);
-    }
+      .then((response) => response.json())
+      .then((data) => {
+        setAllUnits(data);
+      })
+      .catch((err) => console.log(err));
   };
+
+  // const deleteItem = async (id) => {
+
+  //   try {
+  //     const response = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/test/delete_test/${id}`, {
+  //       method: 'DELETE'
+  //     });
+  //     const data = await response.json();
+
+  //     setUpdatePage(!updatePage);
+  //     toast.success("Test Delete Successfully")
+  //   } catch (error) {
+  //     console.error('Error deleting item:', error);
+  //   }
+  // };
 
 
   useEffect(() => {
@@ -95,6 +103,15 @@ function Tests() {
               handlePageUpdate={handlePageUpdate}
               testData={singleTest}
               units={units}
+            />
+          )}
+
+          {showDeleteModal && (
+            <DeleteTest
+              deleteModel={deleteModel}
+              updatePage={updatePage}
+              setUpdatePage={setUpdatePage}
+              singleTest={singleTest}
             />
           )}
 
@@ -140,10 +157,10 @@ function Tests() {
                     Max Value
                   </th>
                   <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                   Unit
+                    Unit
                   </th>
                   <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                   Price
+                    Price
                   </th>
                   <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                     Edit
@@ -173,13 +190,13 @@ function Tests() {
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                             {element.min_value ? element.min_value : "-"}
                           </td>
-                          
+
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                             {element.max_value ? element.max_value : "-"}
                           </td>
-                          
+
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                            {element?.unit?.unit_abb ? element?.unit?.unit_abb :""}
+                            {element?.unit?.unit_abb ? element?.unit?.unit_abb : ""}
                           </td>
                           <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                             {element?.price || 0}
@@ -198,7 +215,8 @@ function Tests() {
 
                             <RiDeleteBinLine color="gray" size={22} cursor={'pointer'}
                               onClick={() => {
-                                deleteItem(element._id)
+                                // deleteItem(element._id)
+                                  deleteModel(element)
                               }}
                             />
                           </td>
