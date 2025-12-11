@@ -110,7 +110,6 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
 
     // Function to add test with subtests
     const addTest = async () => {
-        debugger
         if (!validateFields()) {
             return;
         }
