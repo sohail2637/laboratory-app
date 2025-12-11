@@ -35,7 +35,7 @@ function Patient() {
     const handlePageUpdate = () => {
         setUpdatePage(!updatePage);
     };
-    const filterPatient = patient.filter((element) => {
+    const filterPatient = patient?.filter((element) => {
 
         if (!nameSearchTerm.trim() && !referSearchTerm.trim() && !phoneSearchTerm && !labNumber.trim()) {
             return true;
