@@ -142,22 +142,22 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                     <div className="fixed inset-0 flex items-center justify-center p-4">
                         <Dialog.Panel className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg flex flex-col max-h-[80vh]">
                             {/* Header */}
-                            <div className="flex justify-between items-center border-b pb-4">
+                            <div className="flex items-center justify-between pb-4 border-b">
                                 <h3 className="text-xl font-semibold text-gray-900">Add Test</h3>
                                 <button className="text-gray-500 hover:text-gray-700" onClick={() => setOpen(false)}>
-                                    <XMarkIcon className="h-6 w-6" />
+                                    <XMarkIcon className="w-6 h-6" />
                                 </button>
                             </div>
 
                             {/* Scrollable Form */}
-                            <div className="overflow-y-auto flex-1 px-1 mt-4" style={{ maxHeight: "60vh" }}>
+                            <div className="flex-1 px-1 mt-4 overflow-y-auto" style={{ maxHeight: "60vh" }}>
                                 <form className="space-y-4">
                                     {/* Test Name */}
                                     <div className="space-y-2">
                                         <label className="block text-gray-700">Test Name</label>
                                         <input
                                             type="text"
-                                            className="w-full rounded border p-2"
+                                            className="w-full p-2 border rounded"
                                             value={test.test_name}
                                             onChange={(e) => handleInputChange("test_name", e.target.value)}
                                         />
@@ -175,7 +175,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                 <label className="block text-gray-700">Min Value</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full rounded border p-2"
+                                                    className="w-full p-2 border rounded"
                                                     value={test.min_value}
                                                     onChange={(e) => handleInputChange("min_value", e.target.value)}
                                                 />
@@ -189,7 +189,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                 <label className="block text-gray-700">Max Value</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full rounded border p-2"
+                                                    className="w-full p-2 border rounded"
                                                     value={test.max_value}
                                                     onChange={(e) => handleInputChange("max_value", e.target.value)}
                                                 />
@@ -208,7 +208,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                         <label className="block text-gray-700">Price</label>
                                         <input
                                             type="number"
-                                            className="w-full rounded border p-2"
+                                            className="w-full p-2 border rounded"
                                             value={test.price}
                                             onChange={(e) => handleInputChange("price", e.target.value)}
                                         />
@@ -223,7 +223,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                     <div>
                                         <label className="block text-gray-700">Unit</label>
                                         <select
-                                            className="w-full rounded border p-2"
+                                            className="w-full p-2 border rounded"
                                             value={test.unit}
                                             onChange={(e) => handleInputChange("unit", e.target.value)}
                                         >
@@ -244,13 +244,13 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                         <div className="mt-4">
                                             <h4 className="text-lg font-semibold text-gray-900">Subtests</h4>
                                             {test?.subtests?.map((sub, index) => (
-                                                <div key={index} className="flex gap-2 items-start mt-2">
+                                                <div key={index} className="flex items-start gap-2 mt-2">
                                                     {/* Subtest Name */}
                                                     <div className="w-1/4">
                                                         <input
                                                             type="text"
                                                             placeholder="Name"
-                                                            className="w-full rounded border p-2"
+                                                            className="w-full p-2 border rounded"
                                                             value={sub.test_name}
                                                             onChange={(e) => handleSubtestChange(index, "test_name", e.target.value)}
                                                         />
@@ -264,7 +264,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                         <input
                                                             type="text"
                                                             placeholder="Min"
-                                                            className="w-full rounded border p-2"
+                                                            className="w-full p-2 border rounded"
                                                             value={sub.min_value}
                                                             onChange={(e) => handleSubtestChange(index, "min_value", e.target.value)}
                                                         />
@@ -278,7 +278,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                         <input
                                                             type="text"
                                                             placeholder="Max"
-                                                            className="w-full rounded border p-2"
+                                                            className="w-full p-2 border rounded"
                                                             value={sub.max_value}
                                                             onChange={(e) => handleSubtestChange(index, "max_value", e.target.value)}
                                                         />
@@ -292,7 +292,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                         <input
                                                             type="number"
                                                             placeholder="Price"
-                                                            className="w-full rounded border p-2"
+                                                            className="w-full p-2 border rounded"
                                                             value={sub.price}
                                                             onChange={(e) => handleSubtestChange(index, "price", e.target.value)}
                                                         />
@@ -305,7 +305,7 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                                                     <button
                                                         type="button"
                                                         onClick={() => removeSubtest(index)}
-                                                        className="text-red-500 hover:text-red-700 self-center"
+                                                        className="self-center text-red-500 hover:text-red-700"
                                                     >
                                                         X
                                                     </button>
@@ -318,11 +318,11 @@ export default function AddTest({ addTestModel, handlePageUpdate, units }) {
                             </div>
 
                             {/* Buttons - Fixed at Bottom */}
-                            <div className="flex justify-between items-center mt-4 border-t pt-4">
-                                <button type="button" className="px-4 py-2 bg-blue-500 text-white rounded" onClick={addSubtest}>
-                                    <PlusIcon className="w-5 h-5 inline-block mr-1" /> Add Subtest
+                            <div className="flex items-center justify-between pt-4 mt-4 border-t">
+                                <button type="button" className="px-4 py-2 text-white bg-blue-500 rounded" onClick={addSubtest}>
+                                    <PlusIcon className="inline-block w-5 h-5 mr-1" /> Add Subtest
                                 </button>
-                                <button type="button" className="px-4 py-2 bg-green-500 text-white rounded" onClick={() => addTest(test)}>
+                                <button type="button" className="px-4 py-2 text-white bg-green-500 rounded" onClick={() => addTest(test)}>
                                     Submit
                                 </button>
                             </div>

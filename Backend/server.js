@@ -9,8 +9,9 @@ const catalogeDesignRoute = require("./router/catalogeDesign");
 const unitRoute = require('./router/unit')
 const testRoute = require('./router/test')
 const patientRoute = require('./router/patient')
-
-
+const testBillRoute = require("./router/testBilling")
+const countRoute = require("./router/counter")
+const paymentRoute = require("./router/payment")
 const cors = require("cors");
 const User = require("./models/users");
 const Product = require("./models/Product");
@@ -46,6 +47,10 @@ app.use("/api/unit", unitRoute);
 
 app.use("/api/test", testRoute);
 
+// app.use("/api/patient", patientRoute );
+app.use("/api/bill", testBillRoute );
+app.use("/api/payment", paymentRoute );
+app.use("/api/counter", countRoute );
 app.use("/api/patient", patientRoute);
 
 // ------------- Signin --------------

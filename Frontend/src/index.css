@@ -157,3 +157,19 @@ code {
     display: flex;
     flex-direction: column;
 }
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  #print-area {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+

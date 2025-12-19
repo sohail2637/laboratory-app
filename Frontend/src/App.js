@@ -13,6 +13,9 @@ import Units from "./pages/Units";
 import Patient from "./pages/Patient";
 import PatientForm from "./pages/PatientForm";
 import PatientPreview from "./pages/PatientPreview";
+import Subtest from "./pages/SubTest";
+import Billing from "./pages/Billing";
+import BillingPage from "./pages/Billing";
 // import { ToastContainer } from "react-toastify";
 
 const App = () => {
@@ -78,7 +81,9 @@ const App = () => {
             <Route path="/patient-form/:id" element={<PatientForm />} />
             <Route path="/patient-preview/:id" element={<PatientPreview />} />
             <Route path="/unit-details" element={<Units />} />
+<Route path="/billing/:patientId" element={<BillingPage />} />
             <Route path="/test-details" element={<Tests />} />
+            <Route path="/tests/subtests/:groupId" element={<Subtest />} />
           </Route>
           <Route path="*" element={<NoPageFound />} />
         </Routes>

@@ -8,6 +8,8 @@ import AddTest from '../components/Tests/AddTest';
 import EditTest from '../components/Tests/EditTest';
 import GlobalApiState from '../utilis/globalVariable';
 import DeleteTest from '../components/Tests/DeleteTest';
+import AddTestModal from '../components/Tests/AddTestModal';
+import EditTestModal from '../components/Tests/EditTest';
 
 function Tests() {
   const authContext = useContext(AuthContext);
@@ -86,22 +88,39 @@ function Tests() {
   return (
     <>
 
-      <div className="col-span-12 lg:col-span-10 mt-3 flex justify-center">
+      <div className="flex justify-center col-span-12 mt-3 lg:col-span-10">
 
-        <div className=" flex flex-col gap-5 w-11/12">
+        <div className="flex flex-col w-11/12 gap-5 ">
 
-          {showTestModel && (
-            <AddTest
-              addTestModel={addTestModel}
-              handlePageUpdate={handlePageUpdate}
-              units={units}
-            />
-          )}
-          {showEditTestModel && (
+          {/* {showTestModel && (
+            // <AddTest
+            //   addTestModel={addTestModel}
+            //   handlePageUpdate={handlePageUpdate}
+            //   units={units}
+            // /> 
+          )} */}
+
+          <AddTestModal
+            open={showTestModel}
+            onClose={() => setTestModel(false)}
+            units={units}
+            onSuccess={handlePageUpdate}
+          />
+          {/* {showEditTestModel && (
             <EditTest
               editTestModel={editTestModel}
               handlePageUpdate={handlePageUpdate}
               testData={singleTest}
+              units={units}
+            />
+          )} */}
+          {showEditTestModel && (
+            <EditTestModal
+              open={showEditTestModel}
+              onClose={() => setEditTestModel(false)}
+              testData={singleTest}
+              handlePageUpdate={handlePageUpdate}
+
               units={units}
             />
           )}
@@ -115,12 +134,12 @@ function Tests() {
             />
           )}
 
-          <div className="overflow-x-auto rounded-lg border bg-white border-gray-200 ">
+          <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg ">
             <ToastContainer />
-            <div className="flex gap-4 justify-start items-start p-5 ">
+            <div className="flex items-start justify-start gap-4 p-5 ">
               <span className="font-bold">Tests Detail</span>
             </div>
-            <div className="flex justify-between md:flex-row flex-col gap-2 pt-5 pb-3 px-3">
+            <div className="flex flex-col justify-between gap-2 px-3 pt-5 pb-3 md:flex-row">
               <div className="flex justify-center items-center px-2 h-[40px] border-2 rounded-md ">
                 <img
                   alt="search-icon"
@@ -128,7 +147,7 @@ function Tests() {
                   src={require("../assets/search-icon.png")}
                 />
                 <input
-                  className="border-none outline-none text-xs"
+                  className="text-xs border-none outline-none"
                   type="text"
                   placeholder="Search here"
                   value={searchTerm}
@@ -144,28 +163,31 @@ function Tests() {
                 </button>
               </div>
             </div>
-            <table className="min-w-full divide-y-2 divide-gray-200 text-sm">
+            <table className="min-w-full text-sm divide-y-2 divide-gray-200">
               <thead>
                 <tr>
-                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                     Test Nmae
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                     Min Value
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                     Max Value
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                     Unit
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
+                    SubTest
+                  </th>
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                     Price
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                     Edit
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                     Delete
                   </th>
                 </tr>
@@ -174,7 +196,7 @@ function Tests() {
                 {
                   filteredCatalogue.length == 0 ? (
                     <tr>
-                      <td colSpan="4" className="whitespace-nowrap p-6 text-blue-600 text-center">
+                      <td colSpan="4" className="p-6 text-center text-blue-600 whitespace-nowrap">
                         Record Not Found
                       </td>
                     </tr>) : (
@@ -183,25 +205,40 @@ function Tests() {
                       return (
                         <tr key={element._id}>
 
-                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                             {element.test_name}
                           </td>
 
-                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                             {element.min_value ? element.min_value : "-"}
                           </td>
 
-                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                             {element.max_value ? element.max_value : "-"}
                           </td>
 
-                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                            {element?.unit?.unit_abb ? element?.unit?.unit_abb : ""}
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
+                            {element?.unit?.unit_abb ? element?.unit?.unit_abb : "-"}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+
+
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
+                            {element?.type === "group" ? (
+                              <Link
+                                to={`/tests/subtests/${element._id}`}
+                                className="font-medium text-blue-600 hover:underline"
+                              >
+                                View Subtests
+                              </Link>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                             {element?.price || 0}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                             <span onClick={() => {
                               editTestModel(element)
                             }}>
@@ -211,12 +248,12 @@ function Tests() {
                             </span>
 
                           </td>
-                          <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                          <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
 
                             <RiDeleteBinLine color="gray" size={22} cursor={'pointer'}
                               onClick={() => {
                                 // deleteItem(element._id)
-                                  deleteModel(element)
+                                deleteModel(element)
                               }}
                             />
                           </td>
