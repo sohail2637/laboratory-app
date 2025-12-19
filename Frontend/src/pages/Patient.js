@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaRegEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 import AuthContext from '../AuthContext';
@@ -15,7 +15,7 @@ import GlobalApiState from '../utilis/globalVariable';
 
 function Patient() {
     const authContext = useContext(AuthContext);
-
+const navigate = useNavigate()
     const [showCatalogueModal, setCatalogueModal] = useState(false);
     const [showDeleteModal, setDeleteModal] = useState(false);
     const [patient, setAllPatient] = useState([]);
@@ -155,9 +155,9 @@ function Patient() {
     return (
         <>
 
-            <div className="col-span-12 lg:col-span-10 mt-3 flex justify-center">
+            <div className="flex justify-center col-span-12 mt-3 lg:col-span-10">
 
-                <div className=" flex flex-col gap-5 w-11/12">
+                <div className="flex flex-col w-11/12 gap-5 ">
 
 
 
@@ -169,13 +169,13 @@ function Patient() {
                             singlePatient={singlePatient}
                         />
                     )}
-                    <div className="overflow-x-auto rounded-lg border bg-white border-gray-200 ">
+                    <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg ">
                         <ToastContainer />
-                        <div className="flex gap-4 justify-start items-start p-5 ">
+                        <div className="flex items-start justify-start gap-4 p-5 ">
                             <span className="font-bold">Patient Details</span>
                         </div>
-                        <div className="flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 p-3">
-                            <div className="flex flex-col md:flex-row gap-2 md:gap-4 w-full">
+                        <div className="flex flex-col gap-2 p-3 md:flex-row md:justify-between md:gap-4">
+                            <div className="flex flex-col w-full gap-2 md:flex-row md:gap-4">
                                 {[
                                     { placeholder: "Search by name", value: nameSearchTerm, onChange: setNameSearchTerm },
                                     { placeholder: "Search by number", value: phoneSearchTerm, onChange: setPhoneSearchTerm },
@@ -189,7 +189,7 @@ function Patient() {
                                             src={require("../assets/search-icon.png")}
                                         />
                                         <input
-                                            className="input-field border-none outline-none text-xs w-full p-1"
+                                            className="w-full p-1 text-xs border-none outline-none input-field"
                                             type="text"
                                             placeholder={field.placeholder}
                                             value={field.value}
@@ -207,40 +207,40 @@ function Patient() {
                                 </Link>
                             </div>
                         </div>
-                        <table className="min-w-full divide-y-2 divide-gray-200 text-sm">
+                        <table className="min-w-full text-sm divide-y-2 divide-gray-200">
                             <thead>
                                 <tr>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Patient Name
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Phone Number
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Refer by
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Lab Number
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Total Bill
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Specimen
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Preview
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    {/* <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Report
-                                    </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    </th> */}
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Bill
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Edit
                                     </th>
-                                    <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                                    <th className="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">
                                         Delete
                                     </th>
                                 </tr>
@@ -251,7 +251,7 @@ function Patient() {
                                 {
                                     filterPatient.length == 0 ? (
                                         <tr>
-                                            <td colSpan="4" className="whitespace-nowrap p-6 text-blue-600 text-center">
+                                            <td colSpan="4" className="p-6 text-center text-blue-600 whitespace-nowrap">
                                                 Record Not Found
                                             </td>
                                         </tr>) : (
@@ -260,25 +260,25 @@ function Patient() {
                                             return (
                                                 <tr key={element._id}>
 
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                                                         {element.patient_name}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                                                         {"0" + element.phone_number}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                                                         {element.refer_by}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                                                         {element.lab_no}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                                                         {element.patient_bill ? element.patient_bill : "-"}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                                                         {element.specimen}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
                                                         <Link to={`/patient-preview/${element._id}`}>
                                                             <span>
                                                                 <FaEye color="gray" size={22} cursor={'pointer'}
@@ -286,7 +286,7 @@ function Patient() {
                                                             </span>
                                                         </Link>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {/* <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
 
                                                         <span>
                                                             <FiDownload color="green" size={22} cursor={'pointer'}
@@ -294,17 +294,18 @@ function Patient() {
                                                             />
                                                         </span>
 
-                                                    </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    </td> */}
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
 
                                                         <span>
                                                             <FiDownload color="red" size={22} cursor={'pointer'}
-                                                                onClick={() => downloadJSX(element._id ,"bill")}
+                                                                // onClick={() => downloadJSX(element._id ,"bill")}
+                                                                onClick={() => navigate(`/billing/${element._id}`)}
                                                             />
                                                         </span>
 
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
 
                                                         <Link to={`/patient-form/${element._id}`}>
                                                             <span onClick={() => {
@@ -317,7 +318,7 @@ function Patient() {
                                                             </span>
                                                         </Link>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <td className="px-4 py-2 text-gray-700 whitespace-nowrap">
 
                                                         <RiDeleteBinLine color="gray" size={22} cursor={'pointer'}
                                                             // onClick={() => deleteItem(element._id)}
