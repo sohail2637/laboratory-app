@@ -19,6 +19,8 @@ const Product = require("./models/Product");
 
 const app = express();
 const PORT = 4000;
+
+
 main();
 app.use(express.json());
 app.use(cors());
@@ -41,14 +43,15 @@ app.use("/api/cataloge", catalogeRoute);
 // cataloge Design api 
 app.use("/api/cataloge_design", catalogeDesignRoute);
 
-app.use("/api/unit",unitRoute );
+app.use("/api/unit", unitRoute);
 
-app.use("/api/test",testRoute );
+app.use("/api/test", testRoute);
 
-app.use("/api/patient", patientRoute );
+// app.use("/api/patient", patientRoute );
 app.use("/api/bill", testBillRoute );
 app.use("/api/payment", paymentRoute );
 app.use("/api/counter", countRoute );
+app.use("/api/patient", patientRoute);
 
 // ------------- Signin --------------
 let userAuthCheck;
@@ -81,34 +84,53 @@ app.get("/api/login", (req, res) => {
 // ------------------------------------
 
 // Registration API
-app.post("/api/register", (req, res) => {
-  let registerUser = new User({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    password: req.body.password,
-    phoneNumber: req.body.phoneNumber,
-    imageUrl: req.body.imageUrl,
-  });
+app.post("/api/register", async (req, res) => {
+  try {
+    const newUser = new User({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      password: req.body.password,
+      phoneNumber: req.body.phoneNumber,
+      imageUrl: req.body.imageUrl,
+    });
 
-  registerUser
-    .save()
-    .then((result) => {
-      res.status(200).send(result);
-      alert("Signup Successfull");
-    })
-    .catch((err) => console.log("Signup: ", err));
-  console.log("request: ", req.body);
+    const savedUser = await newUser.save();
+    res.status(200).json(savedUser);
+  } catch (err) {
+    console.log("Signup Error:============", err);
+    res.status(500).json({ message: "Signup failed", error: err });
+  }
 });
 
+// app.post("/api/register", (req, res) => {
+//   let registerUser = new User({
+//     firstName: req.body.firstName,
+//     lastName: req.body.lastName,
+//     email: req.body.email,
+//     password: req.body.password,
+//     phoneNumber: req.body.phoneNumber,
+//     imageUrl: req.body.imageUrl,
+//   });
 
-app.get("/testget", async (req,res)=>{
-  const result = await Product.findOne({ _id: '6429979b2e5434138eda1564'})
+//   registerUser.save()
+//     .then((result) => {
+//       console.log("Signup Result:+++++++++++++", result);
+//       res.status(200).send(result);
+//       alert("Signup Successfull");
+//     })
+//     .catch((err) => console.log("Signup: ", err));
+//   console.log("request:============= ", registerUser);
+// });
+
+
+app.get("/testget", async (req, res) => {
+  const result = await Product.findOne({ _id: '6429979b2e5434138eda1564' })
   res.json(result)
 
 })
 
 // Here we are listening to the server
 app.listen(PORT, () => {
-  console.log("I am live again");
+  console.log("I am live again:", PORT);
 });
