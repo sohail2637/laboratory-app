@@ -9,7 +9,6 @@ export default function TestSelector({
     handleResultChange,
     handleSubtestResultChange,
 }) {
-
     const handleTestSelection = (tests) => {
         onChange(tests.map(test => ({ ...test, selectedSubtests: test.selectedSubtests || [] })));
     };

@@ -345,10 +345,10 @@ export default function PatientPreview() {
             `${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${params.id}`
           );
           const patientData = await patientRes.json();
-
           const selectedTests = await Promise.all(
             patientData.test_type.map(async (pt) => {
-              const masterTest = testData.find((t) => t._id === pt.test);
+              
+              const masterTest = testData.find((t) => t._id === pt._id);
               if (!masterTest) return null;
 
               if (masterTest.type === "simple") {
@@ -375,7 +375,7 @@ export default function PatientPreview() {
                 subtests: subtests
                   .map((sub) => {
                     const matchedSub = pt.subtests.find(
-                      (s) => s.subtest === sub._id
+                      (s) => s._id === sub._id
                     );
                     if (!matchedSub) return null;
 
@@ -461,9 +461,9 @@ export default function PatientPreview() {
                           <p className="mt-1 text-sm font-medium text-red-700">
                             Diagnostic & Laboratory Services
                           </p>
-                          <p className="mt-1 text-xs font-light text-gray-500">
+                          {/* <p className="mt-1 text-xs font-light text-gray-500">
                             Excellence in Healthcare Since 1995
-                          </p>
+                          </p> */}
                         </div>
                       </div>
 
