@@ -61,7 +61,6 @@ export default function PatientForm() {
                         price: item.price
                     };
                 }));
-
                 setTestOptions(options);
 
                 // If editing patient
@@ -69,15 +68,23 @@ export default function PatientForm() {
                     const patientResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${params.id}`);
                     const patientData = await patientResponse.json();
                     const selectedTests = patientData.test_type.map(test => {
-                        const matchedOption = options.find(option => option.id === test.test);
+                        const matchedOption = options.find(option => option.id === test._id);
                         if (matchedOption) {
                             return {
                                 ...matchedOption,
                                 result: test.result || "",
                                 selectedSubtests: matchedOption.subtests?.map(sub => {
-                                    const matchedSub = test.subtests?.find(st => st.subtest === sub._id);
-                                    return matchedSub ? { ...matchedSub, result: matchedSub.result || "" } : null;
+                                    const matchedSub = test.subtests?.find(
+                                        st => st._id?.toString() === sub._id?.toString()
+                                    );
+                                    return matchedSub
+                                        ? {
+                                            ...sub, // ✅ full subtest object
+                                            result: matchedSub.result || ""
+                                        }
+                                        : null;
                                 }).filter(Boolean)
+
                             };
                         }
                         return null;
