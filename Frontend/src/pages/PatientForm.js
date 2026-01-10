@@ -68,26 +68,27 @@ export default function PatientForm() {
                     const patientResponse = await fetch(`${GlobalApiState.DEV_BASE_LIVE}/api/patient/edit_patient/${params.id}`);
                     const patientData = await patientResponse.json();
                     const selectedTests = patientData.test_type.map(test => {
-                        const matchedOption = options.find(option => option.id === test._id);
-                        if (matchedOption) {
-                            return {
-                                ...matchedOption,
-                                result: test.result || "",
-                                selectedSubtests: matchedOption.subtests?.map(sub => {
-                                    const matchedSub = test.subtests?.find(
-                                        st => st._id?.toString() === sub._id?.toString()
-                                    );
-                                    return matchedSub
-                                        ? {
-                                            ...sub, // ✅ full subtest object
-                                            result: matchedSub.result || ""
-                                        }
-                                        : null;
-                                }).filter(Boolean)
+                        const matchedOption = options.find(
+                            option => option.id === test.test
+                        );
 
-                            };
-                        }
-                        return null;
+                        if (!matchedOption) return null;
+
+                        return {
+                            ...matchedOption,
+                            result: test.result || "",
+                            selectedSubtests: matchedOption.subtests
+                                ?.map(sub => {
+                                    const matchedSub = test.subtests?.find(
+                                        st => st.subtest?.toString() === sub._id?.toString()
+                                    );
+
+                                    return matchedSub
+                                        ? { ...sub, result: matchedSub.result }
+                                        : null;
+                                })
+                                .filter(Boolean)
+                        };
                     }).filter(Boolean);
 
                     setPatients({ ...patientData, test_type: selectedTests, date: new Date(patientData.date).toISOString().split("T")[0] });
@@ -118,16 +119,32 @@ export default function PatientForm() {
         }));
     };
 
-    const handleSubtestChange = (testId, selectedSubtests) => {
+    const handleSubtestChange = (testId, selectedSubs) => {
         setPatients(prev => ({
             ...prev,
-            test_type: prev.test_type.map(test =>
-                test.id === testId
-                    ? { ...test, selectedSubtests: selectedSubtests.map(sub => ({ subtest: sub.value, result: test.selectedSubtests.find(s => s.subtest === sub.value)?.result || "" })) }
-                    : test
-            )
+            test_type: prev.test_type.map(test => {
+                if (test.id !== testId) return test;
+
+                return {
+                    ...test,
+                    selectedSubtests: selectedSubs.map(opt => {
+                        // check if this subtest already exists
+                        const existing = test.selectedSubtests?.find(
+                            sub => sub._id === opt.value
+                        );
+
+                        // keep old result if exists
+                        if (existing) return existing;
+
+                        // otherwise add new subtest
+                        const fullSub = test.subtests.find(s => s._id === opt.value);
+                        return { ...fullSub, result: "" };
+                    })
+                };
+            })
         }));
     };
+
 
     const handleResultChange = (testId, result) => {
         setPatients(prev => ({
@@ -141,7 +158,7 @@ export default function PatientForm() {
             ...prev,
             test_type: prev.test_type.map(test =>
                 test.id === testId
-                    ? { ...test, selectedSubtests: test.selectedSubtests.map(sub => sub.subtest === subtestId ? { ...sub, result: newResult } : sub) }
+                    ? { ...test, selectedSubtests: test.selectedSubtests.map(sub => sub._id === subtestId ? { ...sub, result: newResult } : sub) }
                     : test
             )
         }));
@@ -164,6 +181,21 @@ export default function PatientForm() {
 
     const savePatient = async () => {
         try {
+            const formattedTestType = patients.test_type.map(item => {
+                const isGroup = item.type === "group";
+
+                return {
+                    test: item.test || item.id || item._id,
+                    result: item.result || "",
+                    subtests: isGroup
+                        ? (item.selectedSubtests || []).map(st => ({
+                            subtest: st._id,
+                            result: st.result || ""
+                        }))
+                        : []
+                };
+            });
+
             const isEdit = Boolean(params.id);
 
             // 🔹 EDIT MODE → just update patient
@@ -173,7 +205,11 @@ export default function PatientForm() {
                     {
                         method: "PUT",
                         headers: { "Content-type": "application/json" },
-                        body: JSON.stringify(patients),
+                        // body: JSON.stringify(patients),
+                        body: JSON.stringify({
+                            ...patients,
+                            test_type: formattedTestType,
+                        }),
                     }
                 );
 
@@ -200,11 +236,15 @@ export default function PatientForm() {
             }
 
 
-            const formattedTestType = patients.test_type.map(item => ({
-                test: item.id,
-                subtests: item.selectedSubtests,
-                result: item.result,
-            }));
+            // const formattedTestType = patients.test_type.map(item => ({
+            //     test: item.id,
+            //     result: item.result || "",
+            //     subtests: item.selectedSubtests.map(st => ({
+            //         subtest: st._id,
+            //         result: st.result || ""
+            //     }))
+            // }));
+
 
             // 🔹 Save patient with FINAL lab number
             const response = await fetch(
