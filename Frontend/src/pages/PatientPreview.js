@@ -347,8 +347,7 @@ export default function PatientPreview() {
           const patientData = await patientRes.json();
           const selectedTests = await Promise.all(
             patientData.test_type.map(async (pt) => {
-              
-              const masterTest = testData.find((t) => t._id === pt._id);
+              const masterTest = testData.find((t) => t._id === pt.test);
               if (!masterTest) return null;
 
               if (masterTest.type === "simple") {
@@ -367,7 +366,6 @@ export default function PatientPreview() {
                 `${GlobalApiState.DEV_BASE_LIVE}/api/test/${masterTest._id}/subtests`
               );
               const subtests = await subRes.json();
-
               return {
                 id: masterTest._id,
                 test_name: masterTest.test_name,
@@ -375,10 +373,9 @@ export default function PatientPreview() {
                 subtests: subtests
                   .map((sub) => {
                     const matchedSub = pt.subtests.find(
-                      (s) => s._id === sub._id
+                      (s) => s.subtest === sub._id
                     );
                     if (!matchedSub) return null;
-
                     return {
                       ...sub,
                       result: matchedSub.result || "Pending",
@@ -406,19 +403,54 @@ export default function PatientPreview() {
   }, [params.id, authContext.user]);
 
   /* ===================== PAGINATION ===================== */
-  const simpleTests = patients.test_type.filter((t) => t.type === "simple");
-  const groupSubtests = patients.test_type
-    .filter((t) => t.type === "group")
-    .flatMap((group) =>
-      group.subtests.map((sub) => ({
-        ...sub,
-        parentTestName: group.test_name,
-      }))
-    );
+  // const simpleTests = patients.test_type.filter((t) => t.type === "simple");
+  // const groupSubtests = patients.test_type
+  //   .filter((t) => t.type === "group")
+  //   .flatMap((group) =>
+  //     group.subtests.map((sub) => ({
+  //       ...sub,
+  //       parentTestName: group.test_name,
+  //     }))
+  //   );
 
+  // const pages = [];
+  // if (simpleTests.length > 0) pages.push(simpleTests);
+  // groupSubtests.forEach((subtest) => pages.push([subtest]));
+  /* ===================== PAGINATION ===================== */
+
+  const ROWS_PER_PAGE = 18;
+
+  // 1️⃣ Simple tests → single page
+  const simpleTests = patients.test_type.filter(t => t.type === "simple");
+
+  // 2️⃣ Group tests → chunk subtests per test
+  const groupPages = patients.test_type
+    .filter(t => t.type === "group")
+    .flatMap(group => {
+      const pages = [];
+
+      for (let i = 0; i < group.subtests.length; i += ROWS_PER_PAGE) {
+        pages.push({
+          type: "group",
+          parentTestName: group.test_name,
+          tests: group.subtests.slice(i, i + ROWS_PER_PAGE),
+        });
+      }
+
+      return pages;
+    });
+
+  // 3️⃣ Final pages array
   const pages = [];
-  if (simpleTests.length > 0) pages.push(simpleTests);
-  groupSubtests.forEach((subtest) => pages.push([subtest]));
+
+  if (simpleTests.length > 0) {
+    pages.push({
+      type: "simple",
+      tests: simpleTests,
+    });
+  }
+
+  pages.push(...groupPages);
 
   /* ===================== RENDER ===================== */
   return (
@@ -434,8 +466,9 @@ export default function PatientPreview() {
       ) : (
         <div className="flex justify-center w-[76vw] bg-gray-100 py-6">
           <div ref={componentRef} id="capture">
-            {pages.map((pageTests, index) => {
-              const isSimplePage = pageTests[0].type === "simple";
+            {pages.map((page, index) => {
+              // const isSimplePage = pageTests[0].type === "simple";
+              const isSimplePage = page.type === "simple";
 
               return (
                 <div
@@ -515,9 +548,10 @@ export default function PatientPreview() {
                   <div className="mb-auto">
                     {!isSimplePage && (
                       <h2 className="mb-2 text-lg font-bold text-center uppercase">
-                        {pageTests[0]?.parentTestName}
+                        {page.parentTestName}
                       </h2>
                     )}
+
 
                     <table className="w-full text-sm border-collapse">
                       <thead>
@@ -530,31 +564,37 @@ export default function PatientPreview() {
                       </thead>
                       <tbody>
                         {isSimplePage
-                          ? pageTests.map((test, idx) => {
-                            const unitAbb = units.find((u) => u._id === test.unit?._id)?.unit_abb || "N/A";
+                          ? page.tests.map((test, idx) => {
+                            const unitAbb =
+                              units.find(u => u._id === test.unit?._id)?.unit_abb || "N/A";
+
                             return (
-                              <tr
-                                key={test.id}
-                                className={`border-b ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
-                              >
+                              <tr key={test.id} className="border-b">
                                 <td className="px-2 py-2">{test.test_name}</td>
                                 <td className="px-2 py-2 font-medium text-center">{test.result}</td>
-                                <td className="px-2 py-2 text-center">{test.min_value} – {test.max_value}</td>
+                                <td className="px-2 py-2 text-center">
+                                  {test.min_value} – {test.max_value}
+                                </td>
                                 <td className="px-2 py-2 text-center">{unitAbb}</td>
                               </tr>
                             );
                           })
-                          : pageTests.map((sub) => {
-                            const unitAbb = units.find((u) => u._id === sub.unit?._id)?.unit_abb || "N/A";
+                          : page.tests.map(sub => {
+                            const unitAbb =
+                              units.find(u => u._id === sub.unit?._id)?.unit_abb || "N/A";
+
                             return (
                               <tr key={sub._id} className="border-b">
-                                <td className="px-4 py-2">{sub.test_name}</td>
+                                <td className="px-2 py-2">{sub.test_name}</td>
                                 <td className="px-2 py-2 font-medium text-center">{sub.result}</td>
-                                <td className="px-2 py-2 text-center">{sub.min_value} – {sub.max_value}</td>
+                                <td className="px-2 py-2 text-center">
+                                  {sub.min_value} – {sub.max_value}
+                                </td>
                                 <td className="px-2 py-2 text-center">{unitAbb}</td>
                               </tr>
                             );
                           })}
+
                       </tbody>
                     </table>
                   </div>
