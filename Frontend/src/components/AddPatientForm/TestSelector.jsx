@@ -43,23 +43,29 @@ export default function TestSelector({
                                     value: sub._id,
                                     label: `${sub.test_name} (${sub.min_value}-${sub.max_value})`,
                                 }))}
-                                value={test.selectedSubtests?.map(sub => ({
-                                    value: sub.subtest,
-                                    label: test.subtests.find(s => s._id === sub.subtest)?.test_name
-                                }))}
+
+                                value={test.selectedSubtests?.map(sub => {
+                                    const fullSub = test.subtests.find(s => s._id === sub.subtest || s._id === sub._id);
+                                    if (!fullSub) return null;
+                                    return {
+                                        value: fullSub._id,
+                                        label: `${fullSub.test_name} (${fullSub.min_value}-${fullSub.max_value})`
+                                    };
+                                }).filter(Boolean)}
+
                                 onChange={(subs) => handleSubtestChange(test.id, subs)}
                             />
 
                             {test.selectedSubtests?.map(sub => (
-                                <div key={sub.subtest} className="mt-2">
+                                <div key={sub._id} className="mt-2">
                                     <label className="text-sm font-medium text-gray-900">
-                                        Result for {test.subtests.find(s => s._id === sub.subtest)?.test_name}:
+                                        Result for {test.subtests.find(s => s._id === sub._id)?.test_name}:
                                     </label>
                                     <input
                                         type="text"
                                         className="w-full p-2 mt-1 border border-gray-300 rounded-md"
                                         value={sub.result || ""}
-                                        onChange={(e) => handleSubtestResultChange(test.id, sub.subtest, e.target.value )}
+                                        onChange={(e) => handleSubtestResultChange(test.id, sub._id, e.target.value)}
                                     />
                                 </div>
                             ))}
@@ -83,4 +89,3 @@ export default function TestSelector({
         </div>
     );
 }
-  
