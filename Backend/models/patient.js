@@ -44,7 +44,7 @@ const PatientSchema = new mongoose.Schema(
                 result: { type: String },
                 subtests: [
                     {
-                        subtest: { type: mongoose.Schema.Types.ObjectId, ref: "Test.subtests" },
+                        subtest: { type: mongoose.Schema.Types.ObjectId, ref: "Test" },
                         result: { type: String }
                     }]
             }]
