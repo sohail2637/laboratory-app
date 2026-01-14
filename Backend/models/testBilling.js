@@ -35,7 +35,7 @@ const BillingSchema = new mongoose.Schema(
 
         type: {
           type: String,
-          enum: ["simple", "subtest"],
+          enum: ["simple", "subtest" , "group"],
           required: true,
         },
 

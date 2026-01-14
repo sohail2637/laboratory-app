@@ -3,84 +3,119 @@ const Test = require("../models/tests");
 const Patient = require("../models/patient");
 const Payment = require("../models/payment");
 
-
 exports.generateBill = async (req, res) => {
   try {
     const { patientId } = req.params;
     const { userID } = req.body;
 
-    if (!patientId) {
-      return res.status(400).json({ message: "Patient ID is required" });
+    if (!patientId || !userID) {
+      return res.status(400).json({
+        message: "Patient ID and User ID are required",
+      });
     }
 
-    // 1️⃣ Check patient exists
-    const patient = await Patient.findById(patientId);
-    if (!patient) return res.status(404).json({ message: "Patient not found" });
-
-    // 2️⃣ Prevent duplicate bill
-    const existingBill = await Billing.findOne({ patientId });
-    if (existingBill) return res.status(400).json({ message: "Bill already generated" });
-
-    // 3️⃣ Build billable test IDs
+    // 1️⃣ Fetch patient (NO populate)
+    const patient = await Patient.findById(patientId).lean();
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+    // 2️⃣ Collect billable test IDs
     const billableTestIds = [];
 
-    patient.test_type.forEach((pt) => {
-      if (!pt.subtests || pt.subtests.length === 0) {
-        if (pt.test) billableTestIds.push(pt.test);
-      } else {
-        pt.subtests.forEach((sub) => {
-          if (sub.subtest) billableTestIds.push(sub.subtest);
-        });
-      }
-    });
+    for (const entry of patient.test_type || []) {
 
-    // 4️⃣ Fetch patient tests
+  // ✅ Simple test
+  if (entry.test && !entry.subtests?.length) {
+    billableTestIds.push(entry.test.toString());
+  }
+
+  // ✅ Group → only subtests
+  if (entry.subtests?.length > 0) {
+    for (const st of entry.subtests) {
+      billableTestIds.push(st.subtest.toString());
+    }
+  }
+}
+
+
+    if (!billableTestIds.length) {
+      return res.status(400).json({
+        message: "No billable tests found for this patient",
+      });
+    }
+
+    // 3️⃣ Fetch tests from Test collection
     const tests = await Test.find({
+      _id: { $in: billableTestIds },
       userID,
-      _id: { $in: billableTestIds.filter(Boolean) },
-    });
+    }).lean();
+    if (!tests.length) {
+      return res.status(400).json({
+        message: "No matching tests found in database",
+      });
+    }
+    // 4️⃣ Create lookup map (ID → Test)
+    const testMap = new Map();
+    for (const test of tests) {
+      testMap.set(test._id.toString(), test);
+    }
 
-    if (!tests.length) return res.status(400).json({ message: "No billable tests found" });
-
-    // 5️⃣ Build bill items and total amount
+    // 5️⃣ Build bill items & total
+    let items = [];
     let totalAmount = 0;
-    const items = tests.map((test) => {
-      totalAmount += test.price || 0;
-      return {
+
+    for (const testId of billableTestIds) {
+      const test = testMap.get(testId);
+
+      if (!test) continue;
+
+      // ❌ Never bill group
+      if (test.type === "group") continue;
+
+      // ❌ Safety check
+      if (typeof test.price !== "number") continue;
+
+      items.push({
         testId: test._id,
         test_name: test.test_name,
         type: test.type,
-        price: test.price || 0,
-      };
-    });
-
-    // 6️⃣ Create bill
-    try {
-      const bill = await Billing.create({
-        userID,
-        patientId,
-        bill_no: `BILL-${Date.now()}`,
-        items,
-        totalAmount,
-        paidAmount: 0,
-        balanceAmount: totalAmount,
-        status: "UNPAID",
+        price: test.price,
       });
-      return res.status(201).json({ message: "Bill generated successfully", bill });
-    } catch (error) {
-      if (error.code === 11000) {
-        return res.status(400).json({ message: "Cannot generate bill: duplicate entry detected" });
-      }
-      return res.status(500).json({ message: "Server error" });
+
+      totalAmount += test.price;
     }
 
+    if (!items.length) {
+      return res.status(400).json({
+        message: "No valid bill items after processing",
+      });
+    }
 
-    res.status(201).json({ message: "Bill generated successfully", bill });
+    // 6️⃣ Remove old bill (regeneration)
+    await Billing.findOneAndDelete({ patientId });
+
+    // 7️⃣ Create fresh bill
+    const bill = await Billing.create({
+      userID,
+      patientId,
+      bill_no: `BILL-${Date.now()}`,
+      items,
+      totalAmount,
+      paidAmount: 0,
+      balanceAmount: totalAmount,
+      status: "UNPAID",
+    });
+    return res.status(201).json({
+      message: "Bill generated successfully",
+      bill,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Generate Bill Error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
+
 
 
 exports.getBillingByPatient = async (req, res) => {
