@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import GlobalApiState from "../../utilis/globalVariable";
 import AuthContext from "../../AuthContext";
 
-function AddPaymentModal({ billing, onClose, onPaymentAdded }) {
+function AddPaymentModal({ billing, onClose, onPaymentAdded , handlePageUpdate }) {
   const [amount, setAmount] = useState(billing.balanceAmount);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [note, setNote] = useState("");
@@ -42,6 +42,7 @@ function AddPaymentModal({ billing, onClose, onPaymentAdded }) {
 
       toast.success("Payment added successfully");
       onPaymentAdded(data.billing);
+      handlePageUpdate()
       onClose();
     } catch (err) {
       toast.error(err.message);

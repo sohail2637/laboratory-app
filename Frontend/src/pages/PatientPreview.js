@@ -476,73 +476,63 @@ export default function PatientPreview() {
                   className="px-10 py-8 mx-auto my-6 bg-white shadow-lg A4-page flex flex-col justify-between min-h-[29.7cm]"
                 >
                   {/* ===== Header ===== */}
-                  <div className="pb-4 mb-6 border-b">
-                    <div className="flex flex-col items-start justify-between pb-4 mb-6 border-b border-gray-200 md:flex-row md:items-center">
-                      {/* Left: Clinic Identity */}
-                      <div className="flex items-start gap-4 mb-4 md:mb-0">
-                        <div className="p-2 bg-white border border-gray-100 rounded-lg shadow-sm">
-                          <img
-                            src={clinicLogo}
-                            alt="Farhad Clinic Logo"
-                            className="object-contain w-16 h-16 md:w-18 md:h-18"
-                          />
-                        </div>
-                        <div>
-                          <h1 className="text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">
-                            Farhad Clinic
-                          </h1>
-                          <p className="mt-1 text-sm font-medium text-red-700">
-                            Diagnostic & Laboratory Services
-                          </p>
-                          {/* <p className="mt-1 text-xs font-light text-gray-500">
-                            Excellence in Healthcare Since 1995
-                          </p> */}
-                        </div>
-                      </div>
+                  <table className="w-full pb-4 mb-6 border-b border-gray-200">
+                    <tbody>
+                      <tr>
+                        {/* LEFT SIDE */}
+                        <td className="w-1/2 align-top">
+                          <div className="flex items-start gap-3">
+                            <img
+                              src={clinicLogo}
+                              alt="Farhad Clinic Logo"
+                              className="object-contain w-14 h-14"
+                            />
 
-                      {/* Right: Contact Information */}
-                      <div className="text-right">
-                        <div className="inline-block text-left md:text-right">
-                          <div className="mb-2">
-                            <p className="text-sm font-semibold tracking-wide text-gray-900">
-                              674-A Peoples Colony No 1
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              Near Faisal Hospital, Faisalabad, Pakistan
-                            </p>
-                          </div>
-
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-end gap-2">
-                              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                              </svg>
-                              <p className="text-sm font-medium text-gray-900">
-                                041-5383830
+                            <div>
+                              <h1 className="text-2xl font-bold text-gray-900">
+                                Farhad Clinic
+                              </h1>
+                              <p className="text-sm font-semibold text-red-700">
+                                Diagnostic & Laboratory Services
                               </p>
                             </div>
-
-
                           </div>
-                        </div>
-                      </div>
-                    </div>
+                        </td>
 
-                    {/* Patient Info */}
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="space-y-1">
-                        <p><strong>Patient Name:</strong> {patients.patient_name}</p>
-                        <p><strong>Age:</strong> {patients.patient_age}</p>
-                        <p><strong>Ref. By:</strong> {patients.refer_by}</p>
-                      </div>
+                        {/* RIGHT SIDE */}
+                        <td className="w-1/2 text-right align-top">
+                          <p className="text-sm font-semibold text-gray-900">
+                            674-A Peoples Colony No 1
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            Near Faisal Hospital, Faisalabad, Pakistan
+                          </p>
 
-                      <div className="space-y-1 text-right">
-                        <p><strong>Lab No:</strong> {patients.lab_no}</p>
-                        <p><strong>Date:</strong> {patients.date}</p>
-                        <p><strong>Specimen:</strong> {patients.specimen}</p>
-                      </div>
-                    </div>
-                  </div>
+                          <div className="flex items-center justify-end gap-2 mt-2">
+                            {/* Phone Icon */}
+                            <svg
+                              className="w-4 h-4 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                              />
+                            </svg>
+
+                            <p className="text-sm font-medium text-gray-900">
+                              041-5383830
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
 
                   {/* ===== Table ===== */}
                   <div className="mb-auto">
